@@ -30,7 +30,13 @@ From: debian:bullseye
     # install VirtualGL for xfce
     wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb 
     dpkg -i virtualgl_3.0_amd64.deb
-    rm virtualgl_3.0_amd64.deb	
+    rm virtualgl_3.0_amd64.deb
+
+    # install TurboVNC VNC server
+    wget https://sourceforge.net/projects/turbovnc/files/2.2.7/turbovnc_2.2.7_amd64.deb
+    dpkg -i turbovnc_2.2.7_amd64.deb
+    rm turbovnc_2.2.7_amd64.deb
+    export PATH=/opt/TurboVNC/bin:$PATH
 
 %runscript
     echo "This is what happens when you run the container..."

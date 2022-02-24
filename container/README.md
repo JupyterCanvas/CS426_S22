@@ -203,6 +203,54 @@ ASK @ZACH
     rm virtualgl_3.0_amd64.deb
 ```
 ---
+### Install TurboVNC VNC server: 
+shell back in: 
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> wget https://sourceforge.net/projects/turbovnc/files/2.2.7/turbovnc_2.2.7_amd64.deb
+> dpkg -i turbovnc_2.2.7_amd64.deb
+> rm turbovnc_2.2.7_amd64.deb
+> vncserver # not found
+> export PATH=/opt/TurboVNC/bin:$PATH
+> vncserver
+```
+---
+TEST VNCSERVER: 
+
+- in a powershell window: 
+
+tunnel VNC through SSH, sends all data through encrypted tunnel. routes packets from localhost (port 5901) to the remote host (port 5901) through port 22
+
+```bash
+ssh -L 5901:localhost:5901 root@192.168.161.139
+export PATH=/opt/TurboVNC/bin:$PATH
+vncserver
+```
+- in a mobaxterm window: 
+```bash
+hostname = localhost
+port = 5901
+password is for vncserver, not server root account
+```
+> IT WORKS!!!! Responsive GUI desktop!!!
+- in powershell window: 
+```bash
+vncserver -list
+vncserver -kill :1
+```
+---
+- > .DEF CHANGES: install TurboVNC, test VNC through SSH tunnel
+```bash
+# (in %post)
+    wget https://sourceforge.net/projects/turbovnc/files/2.2.7/turbovnc_2.2.7_amd64.deb
+    dpkg -i turbovnc_2.2.7_amd64.deb
+    rm turbovnc_2.2.7_amd64.deb
+    export PATH=/opt/TurboVNC/bin:$PATH
+```
+---
 
 ---
 ---
