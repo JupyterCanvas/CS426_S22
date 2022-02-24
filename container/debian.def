@@ -12,12 +12,17 @@ From: debian:bullseye
     
     apt update && apt upgrade -y
     apt install -y vim \
-        locales
+        locales 
     
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
     locale-gen en_US.utf8
     update-locale LANG=en_US.UTF-8
+
+    # set timezone
+    ln -snf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+    echo America/Los_Angeles > /etc/timezone
+    dpkg-reconfigure --frontend noninteractive tzdata
 
 %runscript
     echo "This is what happens when you run the container..."
