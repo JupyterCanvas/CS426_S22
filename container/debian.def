@@ -6,8 +6,18 @@ From: debian:bullseye
 
 %post
     echo "Hello from inside the container"
-    apt update
-    apt install -y vim 
+    
+    # set apt to noninteractive install
+    export DEBIAN_FRONTEND=noninteractive
+    
+    apt update && apt upgrade -y
+    apt install -y vim \
+        locales
+    
+    # set default locale
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen en_US.utf8
+    update-locale LANG=en_US.UTF-8
 
 %runscript
     echo "This is what happens when you run the container..."
