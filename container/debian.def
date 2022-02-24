@@ -13,7 +13,9 @@ From: debian:bullseye
     apt update && apt upgrade -y
     apt install -y vim \
         locales \
-        firefox-esr pciutils libegl-dev
+        firefox-esr pciutils libegl-dev \
+        xfce4 xfce4-terminal mousepad dbus-x11 \
+        wget libegl1-mesa
     
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -24,6 +26,11 @@ From: debian:bullseye
     ln -snf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
     echo America/Los_Angeles > /etc/timezone
     dpkg-reconfigure --frontend noninteractive tzdata
+
+    # install VirtualGL for xfce
+    wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb 
+    dpkg -i virtualgl_3.0_amd64.deb
+    rm virtualgl_3.0_amd64.deb	
 
 %runscript
     echo "This is what happens when you run the container..."

@@ -160,6 +160,49 @@ singularity shell --writable debian
         firefox-esr pciutils libegl-dev
 ```
 ---
+### Install xfce desktop:
+shell back in: 
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> apt install -y xfce4 xfce4-terminal mousepad
+> startxfce4
+# (process:36851): xfce4-session-CRITICAL **: 02:31:04.470: dbus-launch not found, the desktop will not work properly!
+# Segmentation fault
+> apt install dbus-x11
+> dbus-launch startxfce4
+# install VirtualGL
+> apt install wget
+> wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb 
+> dpkg -i virtualgl_3.0_amd64.deb
+# virtualgl dependency needed
+> apt install libegl1-mesa
+> dpkg -i virtualgl_3.0_amd64.deb
+> dbus-launch startxfce4
+```
+***ISSUES:*** 
+ASK @ZACH
+> firefox can run from ssh, but not directly on server
+
+> xfce eventually loads from ssh, but errors with display
+
+> xfce immediately lods on server - but is completely unresponsive
+> tried giving it a few minutes incase loading in the bkgnd
+- > .DEF CHANGES: isntall xfce, dbus, VirtualGL
+```bash
+# (in %post)
+        xfce4 xfce4-terminal mousepad dbus-x11 \
+        wget libegl1-mesa
+# ...
+
+    # install VirtualGL for xfce
+    wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb
+    dpkg -i virtualgl_3.0_amd64.deb
+    rm virtualgl_3.0_amd64.deb
+```
+---
 
 ---
 ---
