@@ -251,6 +251,53 @@ vncserver -kill :1
     export PATH=/opt/TurboVNC/bin:$PATH
 ```
 ---
+### Install JupyterLab
+shell back in: 
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> apt install -y python3-pip
+> pip install jupyterlab
+# still in container, on mobaxterm
+> jupyter lab # running as rot not recommended
+> jupyter lab --allow-root
+# runs, seems like it doesn't work in browser...
+# but just takes a long time to load in browser from mobaxterm ssh (2.5m)
+```
+TEST WITH VNC:
+- in powershell window: tunnel VNC through SSH
+```bash
+ssh -L 5901:localhost:5901 root@192.168.161.139
+export PATH=/opt/TurboVNC/bin:$PATH
+vncserver
+```
+- in mobaxterm window: 
+```bash
+hostname = localhost, port = 5901
+password is for vncserver, not server root account
+# open desktop terminal
+jupyter lab --allow-root
+```
+> desktop GUI loads quickly AND can open JupyterLab quickly!
+```bash
+vncserver -kill :1
+```
+***ISSUES:*** 
+ASK @ZACH
+> can't run systemctl status jupyter in container. fails with:\
+> `Running in chroot, ignoring request.`
+---
+- > .DEF CHANGES: install pip, jupyterlab, test jupyter with vnc
+```bash
+# (in %post, apt installs):
+        python3-pip
+
+    # install JupyterLab
+    pip install jupyterlab
+```
+---
 
 ---
 ---
