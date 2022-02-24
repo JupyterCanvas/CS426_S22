@@ -1,9 +1,48 @@
 # Container configuration notes
 ---
+[Server Config](#server-config)
 
-# Server config: 
+[Singularity Container Config](#singularity-container-config)
 
-### HANDY COMMANDS: 
+---
+---
+# Singularity container config:
+
+## create basic definition file
+
+```bash
+mkdir containers && cd containers
+vim debian.def
+```
+```
+Bootstrap: library
+From: debian:bullseye
+
+%post
+    echo "Hello from inside the container"
+
+%runscript
+    echo "This is what happens when you run the container..."
+
+```
+---
+standard development cycle (Singularity flow): 
+> 1. create a writable container (sandbox)
+> 2. shell into container with --writable option and tinker with it interactively
+> 3. record changes in definition file
+> 4. rebuild the container from the definition file prn
+> 5. rinse and repeat until we are happy with result
+> 6. rebuild the container from the final definition file as a read-only singularity image format (SIF) image for use in production
+---
+
+
+---
+---
+
+
+# Server config:
+
+### HANDY COMMANDS:
 Clean up history:
 ```bash
 history -w && vim "${HISTFILE}" && history -c && exit
