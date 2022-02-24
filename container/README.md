@@ -131,6 +131,35 @@ singularity shell --writable debian
     dpkg-reconfigure --frontend noninteractive tzdata
 ```
 ---
+### Install firefox browser:
+shell back in: 
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> apt install firefox-esr
+> firefox
+# [GFX1-]: glxtest: libpci missing
+# [GFX1-]: glxtest: libEGL missing
+# firfox GUI starts, but non responsive/window doesn't close
+> apt install pciutils libegl-dev
+> firefox
+> firefox-esr
+```
+***ISSUES:*** 
+> very slow, but both work - ASK @ZACH WHY SO SLOW??
+
+> ?R? firefox vs firefox-esr
+
+- > .DEF CHANGES: install firefox and dependencies
+```bash
+    apt update && apt upgrade -y
+    apt install -y vim \
+        locales \
+        firefox-esr pciutils libegl-dev
+```
+---
 
 ---
 ---

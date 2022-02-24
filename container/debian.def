@@ -12,7 +12,8 @@ From: debian:bullseye
     
     apt update && apt upgrade -y
     apt install -y vim \
-        locales 
+        locales \
+        firefox-esr pciutils libegl-dev
     
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
