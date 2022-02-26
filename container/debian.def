@@ -4,6 +4,9 @@ From: debian:bullseye
 %files
     files/sources.list /etc/apt
 
+%environment
+    export PATH=/opt/TurboVNC/bin:$PATH
+
 %post
     echo "Hello from inside the container"
     
@@ -16,7 +19,8 @@ From: debian:bullseye
         firefox-esr pciutils libegl-dev \
         xfce4 xfce4-terminal mousepad dbus-x11 \
         wget libegl1-mesa \
-        python3-pip
+        python3-pip \
+        novnc nodejs npm
     
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -41,6 +45,8 @@ From: debian:bullseye
 
     # install JupyterLab
     pip install jupyterlab
+
+
 
 %runscript
     echo "This is what happens when you run the container..."

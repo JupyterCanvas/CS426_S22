@@ -1,3 +1,4 @@
+
 # Container configuration notes
 ---
 [Server Config](#server-config)
@@ -26,7 +27,7 @@ From: debian:bullseye
 
 ```
 ---
-standard development cycle (Singularity flow): 
+standard development cycle (Singularity flow):
 > 1. create a writable container (sandbox)
 > 2. shell into container with --writable option and tinker with it interactively
 > 3. record changes in definition file
@@ -45,7 +46,7 @@ singularity shell --writable debian
 ```
 ## ...start tinkering...
 ```bash
-# in container: 
+# in container:
 > cat /etc/apt/sources.list
 > vim sources.list # vim not found
 ```
@@ -54,7 +55,7 @@ singularity shell --writable debian
 1. base container has anemic apt sources.list
 2. vim not installed!
 
-- > .DEF CHANGES: 
+- > .DEF CHANGES:
 (create files/sources.list) add files section, install vim in post:
 ```bash
 %files
@@ -66,21 +67,21 @@ singularity shell --writable debian
     apt install -y vim
 ```
 ---
-shell back in: 
+shell back in:
 ```bash
 singularity shell --writable debian
 ```
 ```bash
-# in container: 
+# in container:
 > apt upgrade
-# get multiple errors related to debconf: 
-# debconf: unable to initialize frontend: 
+# get multiple errors related to debconf:
+# debconf: unable to initialize frontend:
 # debconf doesn't realize it's running non-interactively, trying to open dialog for user input
 
 > export DEBIAN_FRONTEND=noninteractive
 > apt upgrade
 
-# debconf errors gone, gets farther in tzdata update, stalls at: 
+# debconf errors gone, gets farther in tzdata update, stalls at:
 # perl: warning: Setting locale failed.
 # perl: warning: Please check that your locale settings:
 #        LANGUAGE = (unset),
@@ -88,7 +89,7 @@ singularity shell --writable debian
 #        LANG = "en_US.UTF-8"
 #    are supported and installed on your system.
 ```
-***ISSUES:*** 
+***ISSUES:***
 
 3. need to set apt to noninteractive install
 4. need to install and set locales
@@ -110,17 +111,17 @@ singularity shell --writable debian
     update-locale LANG=en_US.UTF-8
 ```
 ---
-shell back in: 
+shell back in:
 ```bash
 singularity shell --writable debian
 ```
 ```bash
-# in container: 
+# in container:
 > date
 # date shows correct TZ, but /etc/localtime and /etc/timezone don't,
 # were updated by tzdata update in upgrade
 ```
-***ISSUES:*** 
+***ISSUES:***
 
 5. need to reconfigure tzdata
 - > .DEF CHANGES: link localtime, set timezone, noninteractive reconfigure tzdata
@@ -132,7 +133,7 @@ singularity shell --writable debian
 ```
 ---
 ### Install firefox browser:
-shell back in: 
+shell back in:
 ```bash
 singularity shell --writable debian
 ```
@@ -147,7 +148,7 @@ singularity shell --writable debian
 > firefox
 > firefox-esr
 ```
-***ISSUES:*** 
+***ISSUES:***
 > very slow, but both work - ASK @ZACH WHY SO SLOW??
 
 > ?R? firefox vs firefox-esr
@@ -161,7 +162,7 @@ singularity shell --writable debian
 ```
 ---
 ### Install xfce desktop:
-shell back in: 
+shell back in:
 ```bash
 singularity shell --writable debian
 ```
@@ -175,14 +176,14 @@ singularity shell --writable debian
 > dbus-launch startxfce4
 # install VirtualGL
 > apt install wget
-> wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb 
+> wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb
 > dpkg -i virtualgl_3.0_amd64.deb
 # virtualgl dependency needed
 > apt install libegl1-mesa
 > dpkg -i virtualgl_3.0_amd64.deb
 > dbus-launch startxfce4
 ```
-***ISSUES:*** 
+***ISSUES:***
 ASK @ZACH
 > firefox can run from ssh, but not directly on server
 
@@ -203,8 +204,8 @@ ASK @ZACH
     rm virtualgl_3.0_amd64.deb
 ```
 ---
-### Install TurboVNC VNC server: 
-shell back in: 
+### Install TurboVNC VNC server:
+shell back in:
 ```bash
 singularity shell --writable debian
 ```
@@ -218,25 +219,28 @@ singularity shell --writable debian
 > vncserver
 ```
 ---
-TEST VNCSERVER: 
+TEST VNCSERVER:
+- in container: 
+```bash
+export PATH=/opt/TurboVNC/bin:$PATH
+vncserver
+```
 
-- in a powershell window: 
+- in a powershell window:
 
 tunnel VNC through SSH, sends all data through encrypted tunnel. routes packets from localhost (port 5901) to the remote host (port 5901) through port 22
 
 ```bash
 ssh -L 5901:localhost:5901 root@192.168.161.139
-export PATH=/opt/TurboVNC/bin:$PATH
-vncserver
 ```
-- in a mobaxterm window: 
+- in a mobaxterm window:
 ```bash
 hostname = localhost
 port = 5901
 password is for vncserver, not server root account
 ```
 > IT WORKS!!!! Responsive GUI desktop!!!
-- in powershell window: 
+- in container:
 ```bash
 vncserver -list
 vncserver -kill :1
@@ -252,7 +256,7 @@ vncserver -kill :1
 ```
 ---
 ### Install JupyterLab
-shell back in: 
+shell back in:
 ```bash
 singularity shell --writable debian
 ```
@@ -266,14 +270,20 @@ singularity shell --writable debian
 # runs, seems like it doesn't work in browser...
 # but just takes a long time to load in browser from mobaxterm ssh (2.5m)
 ```
-TEST WITH VNC:
-- in powershell window: tunnel VNC through SSH
+TEST WITH VNC: 
+
+*[note - see [updated vnc through ssh mobaxterm notes](#ssh-vnc-with-key)]*
+
+- in container: 
 ```bash
-ssh -L 5901:localhost:5901 root@192.168.161.139
 export PATH=/opt/TurboVNC/bin:$PATH
 vncserver
 ```
-- in mobaxterm window: 
+- in powershell window: tunnel VNC through SSH
+```bash
+ssh -L 5901:localhost:5901 root@192.168.161.139
+```
+- in mobaxterm window:
 ```bash
 hostname = localhost, port = 5901
 password is for vncserver, not server root account
@@ -281,10 +291,11 @@ password is for vncserver, not server root account
 jupyter lab --allow-root
 ```
 > desktop GUI loads quickly AND can open JupyterLab quickly!
+- in container:
 ```bash
 vncserver -kill :1
 ```
-***ISSUES:*** 
+***ISSUES:***
 ASK @ZACH
 > can't run systemctl status jupyter in container. fails with:\
 > `Running in chroot, ignoring request.`
@@ -298,6 +309,57 @@ ASK @ZACH
     pip install jupyterlab
 ```
 ---
+### Install NoVNC+websocify
+shell back in:
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> apt install -y novnc # installs websocify too
+# websocify = WebSockets to TCP socket proxy
+> vncserver
+> websockify -D --web /usr/share/novnc/ 6080 localhost:5901
+# -D flag runs a daemon in bkgd, leave off to see output
+```
+- in a web browser: 
+```bash
+192.168.161.139:6080/novnc.html
+# login with turbovnc password
+```
+> Can access container through URL!
+```bash
+# open terminal, launch jupyter lab
+jupyter lab --allow-root
+# launches, but reports error: 
+# Could not determine jupyterlab build status without nodejs
+# stop jupyter server CTRL-C CTRL-C
+apt install -y nodejs npm
+jupyter lab --allow-root
+# no error, reports: Build is up to date
+```
+(close browser)
+- in container: 
+```bash
+lsof -i -P -n | grep LISTEN
+# look for websockify, process id is first # 
+kill <pid>
+vncserver -list 
+vncserver -kill :1 # use display num listed above
+```
+***ISSUES:***
+> have to export TurboVNC to PATH to run vncserver command
+---
+- > .DEF CHANGES: isntall novnc+websockify, add env section, fix jupyter lab error
+```bash
+%environment
+    export PATH=/opt/TurboVNC/bin:$PATH
+
+# (in %post, apt installs):
+        novnc nodejs npm
+```
+---
+
 
 ---
 ---
@@ -321,9 +383,11 @@ in software selection, uncheck desktop & gnome, keep std system utilities
 ### setup ssh server:
 ```bash
 apt install -y vim openssh-server
-vim /etc/ssh/sshd_config # set PermitRootLogin yes
-systemctl restart sshd
-systemctl status sshd
+```
+~~vim /etc/ssh/sshd_config # set PermitRootLogin yes~~
+update: shouldn't allow root login with password, can be bruteforced; use keys instead. 
+see [updated ssh through mobaxterm notes](#ssh-vnc-with-key)
+```bash
 ip a
 ```
 
@@ -400,3 +464,20 @@ rm singularity-ce-3.9.5.tar.gz
 cd singularity-ce-3.9.5/
 ./mconfig && make -C ./builddir && make -C ./builddir install
 ```
+
+---
+---
+### ssh vnc with key 
+
+*using ssh key with tunnel for vnc in mobaxterm*
+
+1. In mobaxterm, select Tools > MobaKeyGen (MobaXerm SSH Key Generator)
+```
+set to Ed25519, select Generate, save public and private keys
+```
+2. add public key to the VM's /root/.ssh/authorized_keys file
+
+**for ssh to VM in mobaxterm:** create ssh session with ip, user=root, port=22. under advanced settings, add private key (.ppk) 
+
+**for vnc tunnel through ssh:** create vnc session with ip=localhost, port=5901 (5900 + vncserver display #). under network settings, add ssh gateway with with ip, user=root, port=22, and key. 
+
