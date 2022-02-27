@@ -19,8 +19,9 @@ From: debian:bullseye
         firefox-esr pciutils libegl-dev \
         xfce4 xfce4-terminal mousepad dbus-x11 \
         wget libegl1-mesa \
-        python3-pip \
-        novnc nodejs npm
+        python3-pip nodejs npm \
+        novnc \
+	iproute2 iputils-ping 
     
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen

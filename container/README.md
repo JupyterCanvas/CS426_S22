@@ -359,6 +359,67 @@ vncserver -kill :1 # use display num listed above
         novnc nodejs npm
 ```
 ---
+### Set up container networking
+By default, Singularity runs containers in host network namespace:
+```bash
+singularity shell -w debian
+apt install -y iproute2 iputils-ping # for ip command, ping
+ip a # same ip as host
+# can ssh to host and run container, but need to ssh directly to container
+# needs unique ip addr/network namespace
+```
+ Singularity offers network virtualization --net option to join a new nework ns, but the net flag can only be used by root, need network namespace for unprivledged users. 
+- create veth pair and network namespace:
+```bash
+# on host, not in container: create new network namespace with veth pair
+
+# create veth pair
+ip link add v0-l type veth peer name v0-r
+ip a
+# create namespace 
+ip netns add ns0
+ip netns list
+# move v0-r to ns0 namespace
+ip link set v0-r netns ns0
+ip a
+# set ip for v0-l
+ip link set v0-l up
+ip addr add 192.168.100.1/24 dev v0-l
+ip addr show dev v0-l
+# in ns0 namespace, set up v0-r
+ip netns exec ns0 ip a
+ip netns exec ns0 ip link set lo up
+ip netns exec ns0 ip link set v0-r up
+ip netns exec ns0 ip addr add 192.168.100.10/24 dev v0-r
+ip netns exec ns0 ip route add default via 192.168.100.1
+ip netns exec ns0 ip addr show dev v0-r
+# now that v0-r up, v0-l should be up:
+ip addr show dev v0-l
+
+# run container in network namespace ns0:
+ip netns exec ns0 singularity shell -w debian
+# in container: 
+> ip a
+> ping 192.168.100.1    # works, can ping veth ip in host namespace
+> ping 192.168.161.139  # works, can ping vm host
+> ping 8.8.8.8          # doesn't work, can't ping outside of network
+> exit
+# on host, not in container: 
+ping 192.168.100.10     # works, can ping veth ip in ns0 namespace
+# in powershell (not in vm)
+ping 192.168.161.139    # works, can ping vm host
+ping 192.168.100.1      # works, can ping veth ip in host namespace
+ping 192.168.100.10     # doesn't work, can't ping veth ip in ns0 namespace
+```
+***ISSUES:***
+> need to setup ipv4 forwarding and DNAT/SNAT for container ns
+---
+- > .DEF CHANGES:
+```bash
+# (in %post, apt installs):
+        iproute2 iputils-ping
+```
+---
 
 
 ---
