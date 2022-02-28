@@ -220,7 +220,7 @@ singularity shell --writable debian
 ```
 ---
 TEST VNCSERVER:
-- in container: 
+- in container:
 ```bash
 export PATH=/opt/TurboVNC/bin:$PATH
 vncserver
@@ -270,11 +270,11 @@ singularity shell --writable debian
 # runs, seems like it doesn't work in browser...
 # but just takes a long time to load in browser from mobaxterm ssh (2.5m)
 ```
-TEST WITH VNC: 
+TEST WITH VNC:
 
 *[note - see [updated vnc through ssh mobaxterm notes](#ssh-vnc-with-key)]*
 
-- in container: 
+- in container:
 ```bash
 export PATH=/opt/TurboVNC/bin:$PATH
 vncserver
@@ -322,7 +322,7 @@ singularity shell --writable debian
 > websockify -D --web /usr/share/novnc/ 6080 localhost:5901
 # -D flag runs a daemon in bkgd, leave off to see output
 ```
-- in a web browser: 
+- in a web browser:
 ```bash
 192.168.161.139:6080/novnc.html
 # login with turbovnc password
@@ -331,7 +331,7 @@ singularity shell --writable debian
 ```bash
 # open terminal, launch jupyter lab
 jupyter lab --allow-root
-# launches, but reports error: 
+# launches, but reports error:
 # Could not determine jupyterlab build status without nodejs
 # stop jupyter server CTRL-C CTRL-C
 apt install -y nodejs npm
@@ -339,12 +339,12 @@ jupyter lab --allow-root
 # no error, reports: Build is up to date
 ```
 (close browser)
-- in container: 
+- in container:
 ```bash
 lsof -i -P -n | grep LISTEN
-# look for websockify, process id is first # 
+# look for websockify, process id is first #
 kill <pid>
-vncserver -list 
+vncserver -list
 vncserver -kill :1 # use display num listed above
 ```
 ***ISSUES:***
@@ -368,51 +368,56 @@ ip a # same ip as host
 # can ssh to host and run container, but need to ssh directly to container
 # needs unique ip addr/network namespace
 ```
- Singularity offers network virtualization --net option to join a new nework ns, but the net flag can only be used by root, need network namespace for unprivledged users. 
+ Singularity offers network virtualization --net option to join a new nework ns, but the net flag can only be used by root, need network namespace for unprivledged users.
 - create veth pair and network namespace:
 ```bash
-# on host, not in container: create new network namespace with veth pair
+# on host, not in container: create new network namespace with veth to bridge
+
+# create namespace
+ip netns add ns0
+
+# create bridge
+ip link add br0 type bridge
+# assign bridge ip
+ip link set br0 up
+ip addr add 10.0.100.1/24 dev br0
 
 # create veth pair
 ip link add v0-l type veth peer name v0-r
-ip a
-# create namespace 
-ip netns add ns0
-ip netns list
-# move v0-r to ns0 namespace
-ip link set v0-r netns ns0
-ip a
-# set ip for v0-l
+# add v0-l to bridge
 ip link set v0-l up
-ip addr add 192.168.100.1/24 dev v0-l
-ip addr show dev v0-l
-# in ns0 namespace, set up v0-r
-ip netns exec ns0 ip a
+ip link set v0-l master br0
+# add v0-r to ns0
+ip link set v0-r netns ns0
+# assign v0-r (container) ip and default route through bridge
 ip netns exec ns0 ip link set lo up
 ip netns exec ns0 ip link set v0-r up
-ip netns exec ns0 ip addr add 192.168.100.10/24 dev v0-r
-ip netns exec ns0 ip route add default via 192.168.100.1
-ip netns exec ns0 ip addr show dev v0-r
-# now that v0-r up, v0-l should be up:
-ip addr show dev v0-l
+ip netns exec ns0 ip addr add 10.0.100.10/24 dev v0-r
+ip netns exec ns0 ip route add default via 10.0.100.1
 
+# check 
+ip a
+# on host, not in container:
+ping 10.0.100.10     # works, can ping veth ip in ns0 namespace
 # run container in network namespace ns0:
 ip netns exec ns0 singularity shell -w debian
-# in container: 
+# in container:
 > ip a
-> ping 192.168.100.1    # works, can ping veth ip in host namespace
+> ping 10.0.100.1    # works, can ping veth ip in host namespace
 > ping 192.168.161.139  # works, can ping vm host
 > ping 8.8.8.8          # doesn't work, can't ping outside of network
 > exit
-# on host, not in container: 
-ping 192.168.100.10     # works, can ping veth ip in ns0 namespace
-# in powershell (not in vm)
-ping 192.168.161.139    # works, can ping vm host
-ping 192.168.100.1      # works, can ping veth ip in host namespace
-ping 192.168.100.10     # doesn't work, can't ping veth ip in ns0 namespace
-```
-***ISSUES:***
-> need to setup ipv4 forwarding and DNAT/SNAT for container ns
+
+# need to setup ip forwarding and nat 
+# on host, not in container:
+sysctl -w net.ipv4.ip_forward=1
+apt install -y iptables
+iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
+ip netns exec ns0 singularity shell -w debian
+# in container: 
+> ping 8.8.8.8 # works!
+> ping google.com # works too!
+> exit
 ---
 - > .DEF CHANGES:
 ```bash
@@ -446,7 +451,7 @@ in software selection, uncheck desktop & gnome, keep std system utilities
 apt install -y vim openssh-server
 ```
 ~~vim /etc/ssh/sshd_config # set PermitRootLogin yes~~
-update: shouldn't allow root login with password, can be bruteforced; use keys instead. 
+update: shouldn't allow root login with password, can be bruteforced; use keys instead.
 see [updated ssh through mobaxterm notes](#ssh-vnc-with-key)
 ```bash
 ip a
@@ -528,7 +533,7 @@ cd singularity-ce-3.9.5/
 
 ---
 ---
-### ssh vnc with key 
+### ssh vnc with key
 
 *using ssh key with tunnel for vnc in mobaxterm*
 
@@ -538,7 +543,7 @@ set to Ed25519, select Generate, save public and private keys
 ```
 2. add public key to the VM's /root/.ssh/authorized_keys file
 
-**for ssh to VM in mobaxterm:** create ssh session with ip, user=root, port=22. under advanced settings, add private key (.ppk) 
+**for ssh to VM in mobaxterm:** create ssh session with ip, user=root, port=22. under advanced settings, add private key (.ppk)
 
-**for vnc tunnel through ssh:** create vnc session with ip=localhost, port=5901 (5900 + vncserver display #). under network settings, add ssh gateway with with ip, user=root, port=22, and key. 
+**for vnc tunnel through ssh:** create vnc session with ip=localhost, port=5901 (5900 + vncserver display #). under network settings, add ssh gateway with with ip, user=root, port=22, and key.
 
