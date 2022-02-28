@@ -20,7 +20,8 @@ From: debian:bullseye
         xfce4 xfce4-terminal mousepad dbus-x11 \
         wget libegl1-mesa \
         python3-pip nodejs npm \
-        novnc
+        novnc \
+	iproute2 iputils-ping 
     
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
@@ -50,4 +51,3 @@ From: debian:bullseye
 
 %runscript
     echo "This is what happens when you run the container..."
-
