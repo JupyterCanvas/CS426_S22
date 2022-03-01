@@ -1,0 +1,40 @@
+server {
+	listen 80 default_server;
+	listen [::]:80 default_server;
+
+	root /var/www/html;
+
+	index index.html index.htm index.nginx-debian.html;
+
+	server_name _;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+
+	location /test {
+		try_files $uri $uri/ $uri.html =404;
+	}
+
+	# Reverse proxy NoVNC+websockify:
+	# adapted from https://github.com/novnc/noVNC/wiki/Proxying-with-nginx
+
+	location /mynovnc {
+		proxy_pass http://10.0.100.10:6080/;
+	}
+	
+	location /websockify {
+		proxy_http_version 1.1;
+		proxy_pass http://10.0.100.10:6080/;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+
+		# VNC connection timeout
+		proxy_read_timeout 61s;
+
+		# Disable cache
+		proxy_buffering off;
+	}
+
+}
+
