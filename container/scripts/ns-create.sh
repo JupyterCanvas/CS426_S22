@@ -22,7 +22,8 @@ ip netns exec ns0 ip link set lo up
 ip netns exec ns0 ip link set v0-r up
 ip netns exec ns0 ip addr add 10.0.100.10/24 dev v0-r
 ip netns exec ns0 ip route add default via 10.0.100.1
+# add ip forwarding to ns0 namespace
+sysctl -w net.ipv4.ip_forward=1
+iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
 
-# start container shell with: 
-# ip netns exec ns0 singularity shell -w debian
-
+echo $'\n# start container shell with:\n ip netns exec ns0 singularity shell -w debian'

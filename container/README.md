@@ -523,6 +523,25 @@ in a browser:
 ***ISSUES:***
 > "/websockify" location needed by novnc, can't prepend or append to path. When can't access it get error, cannot connect to ws://192.168.161.139/websockify Need to find another way to proxy pass outside of websockify location or how to change path used by novnc??? 
 ---
+### Websockify with token files
+```bash
+# on server, not in container: 
+mkdir -p /usr/local/websockify/token/
+vim /usr/local/websockify/token/t1
+# add the following to file: 
+token1: 10.0.100.10:5901
+# start server with token instead of ip:port
+ip netns exec ns0 singularity shell -w debian
+vncserver
+websockify --web /usr/share/novnc/ --token-plugin=TokenFile --token-source=/usr/local/websockify/token/t1 6080
+```
+in a browser: 
+```bash
+http://192.168.161.139/mynovnc/vnc.html?path=/websockify?token=token1
+```
+***ISSUES:***
+> still running a distinct websockify instance in user containers, need to change nginx config and run single websockify instance on server that responds to user html requests
+---
 
 
 ---
