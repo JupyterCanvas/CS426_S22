@@ -542,6 +542,46 @@ http://192.168.161.139/mynovnc/vnc.html?path=/websockify?token=token1
 ***ISSUES:***
 > still running a distinct websockify instance in user containers, need to change nginx config and run single websockify instance on server that responds to user html requests
 ---
+### Websockify from server with user token files
+see https://datawookie.dev/blog/2021/08/websockify-with-token-target-selection/
+```bash
+# on server, not in container: 
+vim /etc/nginx/sites-available/default
+# update proxy_pass ips to server ip: http://192.168.161.139:6080
+
+# install novnc/websockify:
+apt install -y novnc
+mkdir -p /usr/local/websockify/token/
+vim /usr/local/websockify/token/t1
+# add the following to file: 
+token1: 10.0.100.10:5901
+```
+```bash
+# add an index page:
+vim /var/www/html/index.html
+# add link to user url: 
+<a href="http://192.168.161.139/mynovnc/vnc.html?path=/websockify?token=token1">
+  sskidmore
+</a>
+```
+```bash
+ip netns exec ns0 singularity shell -w debian
+# in container: 
+vncserver
+```
+on server: 
+```bash
+websockify --web /usr/share/novnc/ --token-plugin=TokenFile --token-source=/usr/local/websockify/token/t1 6080
+```
+in a browser: 
+```bash
+http://192.168.161.139/index.html
+# click link, or use url directly: 
+http://192.168.161.139/mynovnc/vnc.html?path=/websockify?token=token1
+# vncserver stays running even if exit container shell. 
+# can exit shell and still access container vnc!
+```
+---
 
 
 ---

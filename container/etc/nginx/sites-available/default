@@ -18,17 +18,18 @@ server {
 
 	# Reverse proxy NoVNC+websockify:
 	# adapted from https://github.com/novnc/noVNC/wiki/Proxying-with-nginx
+	# and https://datawookie.dev/blog/2021/08/websockify-with-token-target-selection/
 
 	location /mynovnc {
-		proxy_pass http://10.0.100.10:6080/;
+		proxy_pass http://192.168.161.139:6080/;
 	}
 	
 	location /websockify {
 		proxy_http_version 1.1;
-		proxy_pass http://10.0.100.10:6080/;
+		proxy_pass http://192.168.161.139:6080/;
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
-
+		proxy_set_header Host $host;
 		# VNC connection timeout
 		proxy_read_timeout 61s;
 
