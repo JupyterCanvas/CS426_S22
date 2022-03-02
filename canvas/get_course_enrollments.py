@@ -46,7 +46,8 @@ except ImportError:
 
 BASE_URL = "https://canvas.instructure.com" 
 ACCOUNT_ID = "44240000000000034" # College of Engineering 
-COURSE_ID = "44240000000080854" # CS 381 Spring 2022
+#COURSE_ID = "44240000000080854" # CS 381 Spring 2022
+COURSE_ID = "44240000000083090" # Jupyter Canvas course
 
 def get_account_info(base_url, account_id, headers):
     #GET /api/v1/accounts/:id
@@ -94,7 +95,8 @@ def get_course_enrollments(base_url, course_id, headers):
         print('Making request...')
         #Requests that return multiple items paginated to 10 items by default.
         #set a custom per-page amount with the ?per_page parameter (limit=100)
-        data = {"type[]" : "StudentEnrollment", "per_page" : 100}
+        #data = {"type[]" : "studentenrollment", "per_page" : 100}
+        data = {"per_page" : 100}
         response = requests.get(next_url, headers=headers, data=data)
         if response.status_code != 200:
             logging.error(f"status_code: {response.status_code}, {response.text}")
@@ -134,7 +136,7 @@ def main():
         netids.append(netid)
     netids.sort()
     
-    fout = "381_netids.txt"
+    fout = "Jupyter_netids.txt"
     with open(fout, "w") as f:
         f.write("\n".join(n for n in netids))
 

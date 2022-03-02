@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import json # requests to Canvas api return json objects
 import sys # for sys.exit()
 import pprint # pretty print python data structures
@@ -42,30 +41,72 @@ try:
 except ImportError:
     pass
 
+
 BASE_URL = "https://canvas.instructure.com" 
 ACCOUNT_ID = "44240000000000034" # College of Engineering 
+COURSE_ID = "44240000000083090" # Jupyter Canvas course
 
-# find course id with search term: The partial course name, code, or full ID to
-# match and return in the results list. Must be at least 3 characters.
-def get_course_id(base_url, account_id, search_term, headers):
-    #GET /api/v1/accounts/:account_id/courses
-    url = f"{base_url}/api/v1/accounts/{account_id}/courses"
-    data = {"search_term" : search_term}
+
+def get_user_id(base_url, account_id, netid, headers):
+    user_id = None
+    netid = netid.strip()
+    if netid is None or netid == "":
+        return user_id
+    #GET /api/v1/accounts/:account_id/users
+    url = f"{base_url}/api/v1/accounts/{account_id}/users"
+    data = {"search_term" : netid}
     response = requests.get(url, headers=headers, data=data)
     json_content = json.loads(response.content)
-    return json_content
+    #pprint.pprint(json_content)
+    for u in json_content:
+        if u['login_id'] == netid:
+            user_id = u['id']
+    return user_id
+
+def send_email(base_url, user_id, subject, body, headers):
+    #POST /api/v1/conversations 
+    url = f"{base_url}/api/v1/conversations"
+    data = {
+        'recipients[]': user_id,
+        'force_new': True,
+        'subject': subject,
+        'body': body,
+    }
+    
+    response = requests.post(url, headers=headers, data=data)
+    
+    print(response.status_code)
+    print(response.text)
+
 
 def main():
     headers = {'Authorization': 'Bearer {access_token}'.format(access_token=ACCESS_TOKEN)}
-    #logging.info(headers)
+    
+    netid = "sskidmore"
+    user_id = get_user_id(BASE_URL, ACCOUNT_ID,  netid, headers)
 
-    # find course id:
-    courses = get_course_id(BASE_URL, ACCOUNT_ID, "Jupyter", headers)
-    #pprint.pprint(courses)
-    for c in range(len(courses)):
-        print(f"\tCOURSE_ID : {courses[c]['id']} : {courses[c]['name']}\n")
+    url = "http://192.168.161.139/mynovnc/vnc.html?path=/websockify?token=token1"
+    
+    subject = "Container URL"
+    
+    body = f"""
+        {user_id}, 
+
+        Your container URL is: {url}
+
+        **Do not share this URL with anyone.**
+
+        Email us at eccstaff@engr.unr.edu if you have any issues accessing your container. 
+
+        Best, 
+
+        ECC staff
+    """
+    
+    send_email(BASE_URL, user_id, subject, body, headers)
+
     sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
-
