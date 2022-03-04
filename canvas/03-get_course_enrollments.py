@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-# Creates text file: list of enrolled student netids from course id
+# Creates text file:
+# list of enrolled netids by role from course id
 # ./get_course_enrollments course_id#
 # (run find_course_id.py to get course_id#)
 
@@ -13,17 +14,21 @@ import requests # to send HTTP requests with Python
 import argparse # for adding CLI tags/help
 import textwrap # for formatting argparse help
 import os # mkdirs to recursively create directories
+import datetime # add timestamp to generated file
+from datetime import datetime, timedelta, tzinfo
 
 # setup CLI args and help
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
-        Find Canvas course enrolled student netids with course id:
+        Find Canvas course enrolled netids with course id:
           (run find_course_id.py to get the course id #)
-          Generates: 
+          Generates:
             COURSE = subject and number string, i.e. "CS135"
             course directory in cwd: CS135/
             text file with list of enrolled netids: CS135/CS135-netids.txt
+                file header = COURSE:course_id:timestamp
+                netids grouped by role: instructors, tas, students
         '''),
         epilog='\
         ')
@@ -108,36 +113,57 @@ def get_course(base_url, course_id, headers):
     course = (re.search('CS \d\d\d|CPE \d\d\d', name).group(0))
     # remove whitespace
     course = course.replace(' ', '')
-    return course
+    return course.lower()
 
 
 def main():
     headers = {'Authorization': 'Bearer {access_token}'.format(access_token=ACCESS_TOKEN)}
 
     course_id = args.course_id
+    
+    # timestamp: 22-03-04 05:18 AM
+    date = datetime.now().strftime('%y-%m-%d %I:%M %p')
 
     # get course enrollments:
     enrollments = get_course_enrollments(BASE_URL, course_id, headers)
 
     # get netid for each enrollment:
-    netids = []
+    instructors = []
+    tas = []
+    #observers = []
+    students = []
     for e in enrollments:
         netid = e["user"]["login_id"]
-        netids.append(netid)
-    netids.sort()
+        if e["role"] == "TeacherEnrollment":
+            instructors.append(netid)
+        if e["role"] == "TaEnrollment":
+            tas.append(netid)
+        # ObserverEnrollment ?
+        if e["role"] == "StudentEnrollment":
+            students.append(netid)
     
+    instructors.sort()
+    tas.sort()
+    students.sort()
+
     # get course name: 
 #    course = get_course(BASE_URL, course_id, headers)
 # tested, works with standard CS and CPE course naming conventions
 # Jupyter Canvas course didn't follow std convention, hardcoding for JC: 
-    course = "CS123"
-    
+    course = "cs123"
+
     if not os.path.exists(course):
         os.makedirs(course)
 
     fout = course + "/" + course + "-netids.txt"
     with open(fout, "w") as f:
-        f.write("\n".join(n for n in netids))
+        f.write(course + ":" + str(course_id) + ":" + date + "\n")
+        f.write("# instructors:\n")
+        f.write("\n".join(n for n in instructors))
+        f.write("\n# tas:\n")
+        f.write("\n".join(n for n in tas))
+        f.write("\n# students:\n")
+        f.write("\n".join(n for n in students))
         f.write("\n")
 
     print(f"\n\t file created: {fout}\n")
