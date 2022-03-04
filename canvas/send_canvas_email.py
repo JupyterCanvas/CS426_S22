@@ -46,8 +46,7 @@ BASE_URL = "https://canvas.instructure.com"
 ACCOUNT_ID = "44240000000000034" # College of Engineering 
 COURSE_ID = "44240000000083090" # Jupyter Canvas course
 
-
-def get_user_id(base_url, account_id, netid, headers):
+def get_user(base_url, account_id, netid, headers):
     user_id = None
     netid = netid.strip()
     if netid is None or netid == "":
@@ -58,12 +57,16 @@ def get_user_id(base_url, account_id, netid, headers):
     response = requests.get(url, headers=headers, data=data)
     json_content = json.loads(response.content)
     #pprint.pprint(json_content)
-    for u in json_content:
-        if u['login_id'] == netid:
-            user_id = u['id']
-    return user_id
+    return json_content
 
-def send_email(base_url, user_id, subject, body, headers):
+def get_course_name(base_url, course_id, headers):
+    #GET /api/v1/courses/:id
+    url = f"{base_url}/api/v1/courses/{course_id}"
+    response = requests.get(url, headers=headers)
+    json_content = json.loads(response.content)
+    return json_content['name']
+
+def send_email(base_url, user_id, subject, body, context, headers):
     #POST /api/v1/conversations 
     url = f"{base_url}/api/v1/conversations"
     data = {
@@ -71,30 +74,36 @@ def send_email(base_url, user_id, subject, body, headers):
         'force_new': True,
         'subject': subject,
         'body': body,
+        'context_code': context
     }
-    
     response = requests.post(url, headers=headers, data=data)
-    
-    print(response.status_code)
-    print(response.text)
+    #print(response.status_code)
+    #print(response.text)
 
 
 def main():
     headers = {'Authorization': 'Bearer {access_token}'.format(access_token=ACCESS_TOKEN)}
     
+    course_name = get_course_name(BASE_URL, COURSE_ID, headers)
+    
     netid = "sskidmore"
-    user_id = get_user_id(BASE_URL, ACCOUNT_ID,  netid, headers)
+    user = get_user(BASE_URL, ACCOUNT_ID,  netid, headers)
+    for u in user: 
+        user_name = u['name']
+        if u['login_id'] == netid:
+            user_id = u['id']
+    first_name = user_name.split()[0]
 
     url = "http://192.168.161.139/mynovnc/vnc.html?path=/websockify?token=token1"
     
-    subject = "Container URL"
-    
+    subject = course_name + ' Container URL'
+
     body = f"""
-        {user_id}, 
+        {first_name}, 
 
-        Your container URL is: {url}
+        Your {course_name} container URL is: {url}
 
-        **Do not share this URL with anyone.**
+        Do not share this URL with anyone.
 
         Email us at eccstaff@engr.unr.edu if you have any issues accessing your container. 
 
@@ -102,8 +111,13 @@ def main():
 
         ECC staff
     """
+    # context sets the course title used in email messages (otherwise randomly
+    # assigns a course name that instructor is associated with): 
+    # Zachary Newell (FERPA Training and Engineering Student Resources 2021 - 2022) just sent you a message in Canvas.
+    # Zachary Newell (Project Jupyter) just sent you a message in Canvas.
+    context = "course_" + COURSE_ID
     
-    send_email(BASE_URL, user_id, subject, body, headers)
+    send_email(BASE_URL, user_id, subject, body, context, headers)
 
     sys.exit(0)
 
