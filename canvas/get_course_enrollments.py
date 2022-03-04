@@ -1,20 +1,37 @@
 #!/usr/bin/env python3
 
+# Creates text file: list of enrolled student netids from course id
+# ./get_course_enrollments course_id#
+# (run find_course_id.py to get course_id#)
+
 import json # requests to Canvas api return json objects
-import re # for regular expression matching
-import sys # for sys.exit()
+import re # for regular expression matching (in pagination)
+import sys # for sys.exit, sys.argv
 import pprint # pretty print python data structures
 import logging 
 import requests # to send HTTP requests with Python
 import argparse # for adding CLI tags/help
+import textwrap # for formatting argparse help
+import os # mkdirs to recursively create directories
 
-# can setup CLI flags and help here
+# setup CLI args and help
 parser = argparse.ArgumentParser(
-        description='',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent('''\
+        Find Canvas course enrolled student netids with course id:
+          (run find_course_id.py to get the course id #)
+          Generates: 
+            COURSE = subject and number string, i.e. "CS135"
+            course directory in cwd: CS135/
+            text file with list of enrolled netids: CS135/CS135-netids.txt
+        '''),
         epilog='\
         ')
-##parser.add_argument('searchterm', type=str, help='the string to search for')
-##args = parser.parse_args()
+
+parser.add_argument('course_id', type=int,
+                    help='Canvas course id #. \
+                    Run find_course_id.py to get #')
+args = parser.parse_args()
 
 # setup logging:
 LOG_FILE= ''
@@ -32,10 +49,7 @@ logger.addHandler(logger_fh)
 # on your canvas page, go to Account, Settings, Approved Integrations to
 # generate an access token. 
 
-# student employee as teacher cannot add/remove or retrieve some student info,
-# can get some info about course like section id
-
-# get Zach to create an expiring token, put in local_settings.py file as: 
+# put in local_settings.py file as: 
 # ACCESS_TOKEN="your access token string"
 # (we don't want access tokens in repository code!)
 try:
@@ -45,45 +59,7 @@ except ImportError:
 
 
 BASE_URL = "https://canvas.instructure.com" 
-ACCOUNT_ID = "44240000000000034" # College of Engineering 
-#COURSE_ID = "44240000000080854" # CS 381 Spring 2022
-COURSE_ID = "44240000000083090" # Jupyter Canvas course
-
-def get_account_info(base_url, account_id, headers):
-    #GET /api/v1/accounts/:id
-    url = f"{base_url}/api/v1/accounts/{account_id}"
-    response = requests.get(url, headers=headers)
-    json_content = json.loads(response.content)
-    return json_content
-
-def get_course_info(base_url, course_id, headers):
-    #GET /api/v1/courses/:id
-    url = f"{base_url}/api/v1/courses/{course_id}"
-    response = requests.get(url, headers=headers)
-    json_content = json.loads(response.content)
-    return json_content
-
-def get_course_sections(base_url, course_id, headers):
-    # GET /api/v1/courses/:course_id/sections
-    url = f"{base_url}/api/v1/courses/{course_id}/sections"
-    response = requests.get(url, headers=headers)
-    json_content = json.loads(response.content)
-    return json_content
-
-def print_course_info(base_url, account_id, course_id, headers):
-
-    account = get_account_info(base_url, account_id, headers)
-    #pprint.pprint(account)
-    print(f"\n\tACCOUNT_ID : {account['id']} : {account['name']}")
-
-    course = get_course_info(base_url, course_id, headers)
-    #pprint.pprint(course)
-    print(f"\tCOURSE_ID  : {course['id']} : {course['name']}\n")
-
-    sections = get_course_sections(base_url, course_id, headers)
-    #pprint.pprint(sections)
-    for s in range(len(sections)):
-        print(f"\tSECTION_ID : {sections[s]['id']} : {sections[s]['name']}\n")
+#COURSE_ID = "44240000000083090" # Jupyter Canvas course
 
 def get_course_enrollments(base_url, course_id, headers):
     more = True
@@ -119,15 +95,29 @@ def get_course_enrollments(base_url, course_id, headers):
 
     return enrollments
 
+# generate a course string like "CS135"
+def get_course(base_url, course_id, headers): 
+    #GET /api/v1/courses/:id
+    url = f"{base_url}/api/v1/courses/{course_id}"
+    response = requests.get(url, headers=headers)
+    json_content = json.loads(response.content)
+    #pprint.pprint(json_content)
+    name = json_content['name']
+    # find course "SUBJ ###" strings. 
+    # CS/CPE are current subjects can expand to all CoEN subjs
+    course = (re.search('CS \d\d\d|CPE \d\d\d', name).group(0))
+    # remove whitespace
+    course = course.replace(' ', '')
+    return course
+
+
 def main():
     headers = {'Authorization': 'Bearer {access_token}'.format(access_token=ACCESS_TOKEN)}
 
-    # set found course id to COURSE_ID.
-    # print course info:
-    print_course_info(BASE_URL, ACCOUNT_ID, COURSE_ID, headers)
+    course_id = args.course_id
 
     # get course enrollments:
-    enrollments = get_course_enrollments(BASE_URL, COURSE_ID, headers)
+    enrollments = get_course_enrollments(BASE_URL, course_id, headers)
 
     # get netid for each enrollment:
     netids = []
@@ -136,9 +126,19 @@ def main():
         netids.append(netid)
     netids.sort()
     
-    fout = "Jupyter_netids.txt"
+    # get course name: 
+#    course = get_course(BASE_URL, course_id, headers)
+# tested, works with standard CS and CPE course naming conventions
+# Jupyter Canvas course didn't follow std convention, hardcoding for JC: 
+    course = "CS123"
+    
+    if not os.path.exists(course):
+        os.makedirs(course)
+
+    fout = course + "/" + course + "-netids.txt"
     with open(fout, "w") as f:
         f.write("\n".join(n for n in netids))
+        f.write("\n")
 
     print(f"\n\t file created: {fout}\n")
 

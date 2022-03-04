@@ -104,6 +104,7 @@ def main():
     #courses = get_course_id(BASE_URL, ACCOUNT_ID, "cs 135", headers)
     courses = get_course_id(BASE_URL, ACCOUNT_ID, search_term, headers)
     #pprint.pprint(courses)
+    print('\n')
     for c in range(len(courses)):
         print(f"\t{c}. COURSE_ID : {courses[c]['id']} : {courses[c]['name']}\n")
     sys.exit(0)
