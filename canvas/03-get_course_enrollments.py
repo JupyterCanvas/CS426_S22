@@ -24,9 +24,9 @@ parser = argparse.ArgumentParser(
         Find Canvas course enrolled netids with course id:
           (run find_course_id.py to get the course id #)
           Generates:
-            COURSE = subject and number string, i.e. "CS135"
-            course directory in cwd: CS135/
-            text file with list of enrolled netids: CS135/CS135-netids.txt
+            COURSE = subject and number string, i.e. "cs135"
+            course directory in cwd: cs135/
+            text file with list of enrolled netids: cs135/cs135-netids.txt
                 file header = COURSE:course_id:timestamp
                 netids grouped by role: instructors, tas, students
         '''),
