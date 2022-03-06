@@ -1,2 +1,3 @@
 testing gitnotes
 
+testing subsequent push after initial upstream set
