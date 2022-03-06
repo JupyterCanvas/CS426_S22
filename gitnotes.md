@@ -25,7 +25,7 @@ git config --global init.defaultBranch main
 git config --list
 ```
 ## check for ssh key
-```
+```bash
 ls -al ~/.ssh
 # generate ssh key pair
 ssh-keygen -t ed25519 -C "obeytheviszla@gmail.com"
@@ -38,24 +38,21 @@ cat ~/.ssh/id_ed25519.pub
 # test SSH connection to GitHub
 ssh -T git@github.com
 ```
-# initialize git 
+## initialize git 
+```bash
 git init
 # check
 git status
-
-git branch -M main
-changes your main branch's name to "main". The default branch might be created as "master", but "main" is the standard name for this repo now
+git remote add origin git@github.com:JupyterCanvas/CS426_S22.git
+git fetch
+git pull origin main
 git status
-git remote add origin git@github.com:aVISN/CS425_F21.git
-git push -u origin main
-# check github online repo
-
-# Setting up a new personal development branch
-```bash
-## There are a lot of unecessary steps here especially all the calls to git status
-## but using lots status checks and things like fetch before pull to get a better understanding of process:
 ```
+## Setting up a new personal development branch
 ```bash
+# There are a lot of unecessary steps here especially all the calls to git status
+# but using lots status checks and things like fetch before pull to get a better understanding of process:
+
 # make sure local is up to date with remote before create branch
 git status
 # see if anything updated on remote repo 
@@ -65,8 +62,8 @@ git status
 git pull
 git status
 ```
+## create a new branch
 ```bash
-# create a new branch
 # -b option creates the branch if it does not exist and switches to it
 # command is git checkout -b nameOfNewBranchHere, I am using the name "main-S" ("main-{my first initial}")
 git checkout -b main-S
