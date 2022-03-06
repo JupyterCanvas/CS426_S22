@@ -40,6 +40,8 @@ ssh -T git@github.com
 ```
 ## initialize git 
 ```bash
+mkdir test
+cd test
 git init
 # check
 git status
@@ -66,60 +68,60 @@ git status
 ```bash
 # -b option creates the branch if it does not exist and switches to it
 # command is git checkout -b nameOfNewBranchHere, I am using the name "main-S" ("main-{my first initial}")
-git checkout -b main-S
+git checkout -b test-git
 
 # check using new branch
 git status
 ```
 ```bash
 # create a test file and push to new branch
-cd ~/hello_github
-git status
-vim hello_branch.txt
+mkdir testgit
+cd testgit
+vim testgit.txt
 git status
 git add .
 git status
-git commit -m "Testing git branch creation and use with Github"
-git push --set-upstream origin main-S
+git commit -m "testing gitnotes"
+git push --set-upstream origin test-git
 
 # note, after setting the upstream branch, can just use git push for subsequent commits to branch
-# edit hello_branch.txt
-vim hello_branch.txt
+# edit testgit.txt
+vim testgit.txt
 git status
 git add .
 git status
-git commit -m "Testing subsequent pushes to branch after initial upstream set "
-git push 
+git commit -m "testing gitnotes: subsequent push to branch after upstream set"
+git push
 ```
 ```bash
 # (optional) pulling from main to branch
 # Example: updated repo README in main and merged updated main with my branch
 # switch to main branch to update repo README
+cd ..
 git checkout main
 git status
 
-# update repo README
-cd /
-vim README.md
-
-# push to main branch
+# add a new file to main branch
+vim testgit.txt
 git status
 git add .
 git status
-git commit -m "Updated to include branch creation info"
+git commit -m "testing gitnotes: pulling from branch to main"
+
+# push to main branch
 # since we have been working in different branch, be sure to set upstream with -u option
 git push -u origin main
 git status
 
 # switch back to personal development branch
-git checkout main-S
+git checkout test-git
 git status
 # pull updates from main branch into local development branch
 git fetch origin main
 git pull origin main
 git status
 # push updates to development branch to remote 
-git push -u origin main-S
+git push -u origin test-git
 git status
 # have now merged updates from main branch into personal development branch
 # does not modify/update main branch in any way
