@@ -1,0 +1,17 @@
+.header {
+  text-align: center;
+  background: #badff5;
+  color: white;
+  font-size: 30px;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
+}
+.hello{
+	font-size: 18px;
+	color: #fff;
+	margin-right: 20px;
+	
+}
+

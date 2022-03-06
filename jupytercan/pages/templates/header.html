@@ -1,0 +1,16 @@
+
+{% load static %}
+
+{% block styles %}
+   <link rel="stylesheet" href="{% static 'css/header.css' %}">
+{% endblock styles %}
+
+
+{% block content %}
+<div class="header text-center">
+  <h1>Dashboard</h1>
+  <span class="hello">Hello, {{request.user}}</span>
+</div>
+
+{% endblock content %} 
+

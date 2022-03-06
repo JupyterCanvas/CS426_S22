@@ -1,0 +1,57 @@
+<!-- base html file for use with template inheritance: 
+  “skeleton” base template contains all common elements of site 
+  “child” templates fill empty blocks with content --> 
+
+<!-- docs Django templating language: https://docs.djangoproject.com/en/3.2/ref/templates/language/  -->
+
+<!-- serving static files: https://docs.djangoproject.com/en/3.2/howto/static-files/# -->
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    
+    <!-- Required meta tags -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <!-- Font Awesome CSS -->
+    <!-- replaced local all.css with cdn, see: https://fontawesome.com/account/cdn 
+	    cdn still uses all.css, see: https://github.com/FortAwesome/Font-Awesome/blob/master/css/all.css 
+	    to override something from all.css now, add class to either base.css (for all pages) 
+	    or a particular page's .css file such as chat.css. -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" integrity="sha384-DyZ88mC6Up2uqS4h/KRgHuoeGwBcD4Ng9SiP4dIRy0EXTlnuz47vAwmeGwVChigm" crossorigin="anonymous">
+
+    <link href="{% static 'css/base.css' %}" rel="stylesheet"/>
+    
+    {% block styles %}
+    <!-- block of style links for each page -->
+    {% endblock styles%}
+
+  </head>
+
+  <body>
+
+    <div id="main-content" class="row gx-0">
+
+      {% block content %}
+        <!-- block for pages inhertiting from base -->
+      {% endblock content %}    
+
+    </div>
+
+    <div id="footer" class="row"></div>    
+
+    <!-- JavaScript Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+  </body>
+</html>

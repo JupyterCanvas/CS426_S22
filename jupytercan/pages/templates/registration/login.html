@@ -1,0 +1,74 @@
+<!-- login form page -->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %} 
+{% load static %}
+
+
+{% block content %}
+<style>
+
+
+</style>
+</head>
+<body>
+<div class="center">
+<h2>Jupyter Canvas admin login page</h2>
+
+<button onclick="document.getElementById('id01').style.display='block'" class="button indash" style="width:auto;">Login</button>
+
+<h4> 
+This is the project that was created</br> for CS 426 by team Jupyter Canvas
+</h4>
+</div>
+<div id="id01" class="modal">
+  
+  <form class="modal-content animate" action="" method="post">
+    <div class="imgcontainer">
+      <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+      <img class="avatar" src="{% static 'pages/jupiter.png' %}">
+    </div>
+	{% csrf_token %}
+    <div class="container">
+      <label for="uname"><b>Username</b></label>
+      <input type="text" placeholder="Enter Username" name="username" class="form-control custom-input">
+
+      <label for="psw"><b>Password</b></label>
+      <input type="password" placeholder="Enter Password" name="password" class="form-control custom-input">
+        
+      <input class="button bsize" type="submit" value="Login" style="background-color: #badff5; border-radius: 10px">
+      <label>
+        <input type="checkbox" checked="checked" name="remember"> Remember me
+      </label>
+    </div>
+    <div class="container">
+      <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+      <span class="password"></br>Forgot <a href="#">password?</a></span>
+      <p>Contact us at JupyterCanvas@gmail.com</p>
+    </div>
+  </form>
+  	{% for message in messages %}
+		<p id="messages">{{messages}}</p>
+	{% endfor %}
+</div>
+
+<script>
+// Get the modal
+var modal = document.getElementById('id01');
+
+// When the user clicks anywhere outside of the modal, close it
+window.onclick = function(event) {
+    if (event.target == modal) {
+        modal.style.display = "none";
+    }
+}
+</script>
+<script type="text/javascript">
+window.onload = function(){ 
+                alert("You are currently logged out.");
+                }
+</script>
+
+</body>
+{% endblock content %}

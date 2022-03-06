@@ -1,0 +1,32 @@
+<!-- file upload form page -->
+
+{% extends 'base.html' %}
+
+<!-- https://django-crispy-forms.readthedocs.io/en/latest/ -->
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+{% include 'header.html' %}
+{% include 'sidebar.html' %}
+
+  <div class="col-md-10 p-5">
+    
+    <form method="post" enctype="multipart/form-data">
+
+      <!-- Cross Site Request Forgery: https://docs.djangoproject.com/en/3.2/ref/csrf/ -->
+      {% csrf_token %}
+
+      {{ form|crispy }}
+
+      <button type="submit" class="btn btn-success btn-lg">Upload file</button>
+
+    </form>
+
+  </div> 
+
+{% endblock content %}
+
+
+
+

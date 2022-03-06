@@ -1,0 +1,100 @@
+.search-wrapper .search-btn:hover{
+    background-color: #f10215;
+}
+
+
+article{
+    width: 1200px;
+    height: 850px;
+    padding: 1px 0;
+    margin: 0 auto;
+}
+
+article ul{
+    width:1000px;
+    height: 680px;
+   
+}
+
+.first li{
+    width: 800px;
+    height: 100px;
+    font-size: 30px;
+    margin:15px 30px;
+    text-align: center;
+    overflow:scroll;
+    font-size: 20px;
+    border: 1px solid black;
+}
+
+.rchat{
+    
+    display:block;
+    height:35px;
+    margin: 10px;
+    font-size: 20px;
+    text-align: left;
+    border: 1px solid black;
+}
+
+li a{
+    text-decoration: none;
+}
+
+.first li:nth-child(1){
+    width: 1000px;
+    height: 150px;
+}
+
+.first li:nth-child(2){
+    width: 1000px;
+    height: 50px;
+}
+
+
+.first li:nth-child(3){
+    height: 100px;
+    width: 1000px;
+}
+
+
+.first li:nth-child(4){
+    width:1000px;
+    height: 100px;
+}
+
+.first li:nth-child(5){
+    width: 1000px;;
+    height: 100px;
+}
+
+li a:hover{
+    background-color:red;
+}
+
+.first li:nth-child(6){
+    width:1000px;
+    height: 250px;
+}
+
+.comt{
+    display:block;
+    width: 1000px;
+    height: 140px;
+    margin: 10px;
+    font-size: 20px;
+    text-align: left;
+}
+
+.zi{
+    height: 100px;
+    width: 500px;
+    overflow:scroll;
+    text-align: left;
+}
+
+.anniu:hover{
+    background-color:red;
+}
+
+

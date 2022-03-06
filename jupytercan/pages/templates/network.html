@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block styles %}
+   <link rel="stylesheet" href="{% static 'css/network.css' %}">
+{% endblock styles %}
+
+{% block content %}
+{% include 'header.html' %}
+{% include 'sidebar.html' %}
+
+<div id="recent-views" class="col-sm-10">
+    <!-- ********************************** -->
+<div id="network-search" class="mt-3 mx-auto p-5" >Search by Keyword <input placeholder="Spaceships"></input></div>
+    <div id="carouselExampleDark" class="carousel carousel-dark slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+          <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="1" aria-label="Slide 2"></button>
+          <button type="button" data-bs-target="#carouselExampleDark" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active my-5" data-bs-interval="10000">
+                <!-- *************** card ********************************** -->
+                <div class="card mx-auto my-5" style="width: 18rem;">
+                    <img src="{% static 'pages/fake-person-img.PNG' %}" class="card-img-top" alt="...">
+                    <div class="card-body">
+                        <h5 class="card-title">Marvin Martin</h5>
+                        <p class="card-text">Mechanic</p>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                    <li class="list-group-item "><dt>Skills</dt></li>
+                    <li class="list-group-item">Fixing flying saucers</li>
+                    <li class="list-group-item">Hot rodding spaceships</li>
+                    </ul>
+                    <div class="card-body mx-auto">
+                    <a href="#" class="card-link">Contact info</a>
+                    <a href="#" class="card-link">Portfolio</a>
+                    </div>
+                </div>
+                <!-- ************************************************* -->
+            </div>
+          <div class="carousel-item my-5" data-bs-interval="2000">
+            <!-- *************** card ********************************** -->
+            <div class="card mx-auto my-5" style="width: 18rem;">
+                <img src="{% static 'pages/fake-person-img.PNG' %}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Alice Spaceson</h5>
+                    <p class="card-text">Pilot</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                <li class="list-group-item "><dt>Skills</dt></li>
+                <li class="list-group-item">Flying saucers</li>
+                <li class="list-group-item">Lightspeed</li>
+                </ul>
+                <div class="card-body mx-auto">
+                <a href="#" class="card-link">Contact info</a>
+                <a href="#" class="card-link">Portfolio</a>
+                </div>
+            </div>
+            <!-- ************************************************* -->
+          </div>
+          <div class="carousel-item my-5">
+            <!-- *************** card ********************************** -->
+            <div class="card mx-auto my-5" style="width: 18rem;">
+                <img src="{% static 'pages/fake-person-img.PNG' %}" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">Bob Spaceman</h5>
+                    <p class="card-text">Copilot</p>
+                </div>
+                <ul class="list-group list-group-flush">
+                <li class="list-group-item "><dt>Skills</dt></li>
+                <li class="list-group-item">Good DJ</li>
+                <li class="list-group-item">Feeding Pilots</li>
+                </ul>
+                <div class="card-body mx-auto">
+                <a href="#" class="card-link">Contact info</a>
+                <a href="#" class="card-link">Portfolio</a>
+                </div>
+            </div>
+            <!-- ************************************************* -->
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleDark" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+<!-- ********************************** -->
+</div>
+{% endblock content %}

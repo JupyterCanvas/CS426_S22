@@ -1,0 +1,16 @@
+/* ******* carousel */
+.card-img-top
+{
+    height:auto;
+    width: 120px;
+    margin: 5px auto;
+    margin-top:10px;
+
+    border:black solid 1px;
+}
+
+.card-body
+{
+    margin: 0 auto;
+    text-align: center;
+}
