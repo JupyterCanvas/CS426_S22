@@ -1,0 +1,14 @@
+[Unit]
+Description=Network namespace ns%i configuration
+Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+BindsTo=netns@%i.service
+After=netns@%i.service
+StopWhenUnneeded=true
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/systemd/system/netns/ns%i.conf
+
+# setup networking in ns: bridge <- veth -> container
+ExecStart=/etc/systemd/system/scripts/netns.sh ns%i vl-%i vr-%i ${VR_IP} ${BR} ${BR_IP}

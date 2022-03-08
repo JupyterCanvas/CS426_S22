@@ -1,18 +1,18 @@
 [Unit]
-Description=Network bridge br-%i
+Description=Network bridge br%i
 StopWhenUnneeded=true
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-EnvironmentFile=/etc/systemd/system/netns/%i/bridge-%i.conf
+EnvironmentFile=/etc/systemd/system/netns/bridge-%i.conf
 
 # create bridge
-ExecStart=/sbin/ip link add br-%i type bridge
+ExecStart=/sbin/ip link add br%i type bridge
 
 # assign bridge ip
-ExecStart=/sbin/ip link set br-%i  up
-ExecStart=/sbin/ip addr add ${BR_IP} dev br-%i 
+ExecStart=/sbin/ip link set br%i up
+ExecStart=/sbin/ip addr add ${BR_IP} dev br%i 
 
 [Install]
 WantedBy=multi-user.target
