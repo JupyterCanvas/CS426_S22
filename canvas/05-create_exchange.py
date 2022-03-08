@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# Adds users to server from list of netids
-# ./add_users.py CS123/CS123-netids.txt
+# Creates exchange directory for Jupyter extension nbgrader
+# ./create_exchange.py CS123/CS123-netids.txt
 # (run get_course_enrollments.py to generate list file)
 
 import sys # for sys.exit, sys.argv

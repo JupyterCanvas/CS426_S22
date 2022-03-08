@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# Adds users to server from list of netids
-# ./add_users.py CS123/CS123-netids.txt
-# (run get_course_enrollments.py to generate list file)
+# Remove namespaces created with create_namespace.py
+# ./cleanup_createns.py CS123/CS123-netns.txt
+# (run create_namespaces.py to generate list file)
 
 import sys # for sys.exit, sys.argv
 import logging 

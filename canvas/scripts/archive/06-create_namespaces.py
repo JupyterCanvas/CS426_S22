@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-# Adds users to server from list of netids
-# ./add_users.py CS123/CS123-netids.txt
-# (run get_course_enrollments.py to generate list file)
+# Creates network namespaces for user containers
+# ./create_namespaces.py CS123/CS123-pass.txt
+# (run add_users.py to generate list file)
 
 import sys # for sys.exit, sys.argv
 import logging 
@@ -57,98 +57,62 @@ logger.propagate = False
 
 
 def create_br(course):
-    # course = cs123, course_no = 123
+    br_name = "br-" + course
     course_no = re.split('(\d+)', course)[1]
-    
-    br_name = "br" + course_no # br123
-    br_ip = "10.0." + course_no + ".1/24" # 10.0.123.1/24
-    filename = f"/etc/systemd/system/netns/bridge-{course_no}.conf"
-    conf = f"BR_IP={br_ip}"
-    with open(filename, 'w') as fout:
-        fout.write(conf)
-    
-    instance = f"netbr@{course_no}.service"
+    br_ip = "10.0." + course_no + ".1/24"
 
-    p = subprocess.run(["systemctl", "start", instance], stdout=PIPE)
+    # create bridge and assign ip 
+    # $1 = br_name, $2 = br_ip
+    p = subprocess.run(["./scripts/create-course-br.sh", br_name, br_ip], stdout=PIPE)
     if p.returncode == 0:
         logger.info("Bridge " + br_name + " created for " + course + ", ip=" + br_ip)
     else:
         logger.info("Error creating bridge for " + course)
 
-    return [course_no, br_name, br_ip]
+    return [br_name, br_ip, course_no]
 
-
-# create network namespace configuration files used by systemd
-def create_ns_config(br, usernames):
-    course_no = str(br[0])
-    br_name = br[1]
-    brgw_ip = br[2].rsplit('/', 1)[0]
-    subnet = brgw_ip.rsplit('.', 1)[0]
-    netmask = "/24"    
+def create_ns(br, usernames, course):
+    br_name = br[0]
+    br_ip = br[1].rsplit('/', 1)[0]
+    course_no = br[2]
+    subnet = br_ip.rsplit('.', 1)[0] 
+    netmask = "/24"
     num = 10
-    
+
     namespaces = []
     for u in usernames: 
-        ns = course_no + str(num) # 12310
-        ns_name = "ns" + ns # ns12310
-        vr_ip = subnet + "." + str(num) + netmask
-        filename = f"/etc/systemd/system/netns/{ns_name}.conf"
-        conf = f"VR_IP={vr_ip}\nBR={br_name}\nBR_IP={brgw_ip}"
-        with open(filename, 'w') as fout:
-            fout.write(conf)
-        namespace = u + ":" + ns_name + ":" + vr_ip # cs123-newellz2:ns12310:10.0.123.10
-        namespaces.append(namespace)
-        num += 1
-    
-    course = "cs" + course_no
+        ns_name = "ns-" + u
+        veth_l = "vl-" + str(course_no) + "-" + str(num)
+        veth_r = "vr-" + str(course_no) + "-" + str(num)
+        veth_r_ip = subnet + "." + str(num) + netmask
+        p = subprocess.run(["./scripts/create-user-ns.sh", ns_name, veth_l, veth_r, veth_r_ip, br_name, br_ip], stdout=PIPE)
+        if p.returncode == 0:
+            logger.info("Namespace " + ns_name + " created with ip: " + veth_r_ip)
+            ns = ns_name + ":" + veth_r_ip
+            namespaces.append(ns)
+            num += 1 # increment ip for next user
+        else:
+            logger.info("Error creating namespace for " + u)
+            sys.exit(0)
+
     # create file with list of ns_name:ip for each user
     filename = course + "/" + course + "-netns.txt"
     with open(filename, 'w') as fout:
         fout.write("\n".join(n for n in namespaces))
-    
+
     print(f"\n\t file created: {filename} \n")
-
-    return namespaces
-        
-
-# start service to test network configuration in namespaces
-def create_netns(namespaces):
-
-    for n in namespaces: 
-        # cs123-newellz2:ns12310:10.0.123.10
-        namespace = n.split(':')
-        print(namespace)
-        user = namespace[0]
-        print(user)
-        ns_name = namespace[1]
-        print(ns_name)
-        ns = re.split('(\d+)', ns_name)[1] 
-        print(ns)
-        vr_ip = namespace[2]
-        print(vr_ip)
-
-        instance = f"testnetns@{ns}.service"
-        print(instance)
-        
-        p = subprocess.run(["systemctl", "start", instance], stdout=PIPE)
-        if p.returncode == 0:
-            logger.info("Network namespace " + ns_name + " created for " + user + ", ip=" + vr_ip)
-        else:
-            logger.info("Error creating namespace for " + user)
-
-
+            
 def main():
     with open(args.passwd_list.name) as fin:
         usernames = [line.split(':')[0] for line in fin]
 
     course = usernames[0].split("-")[0]
-    
+
     br = create_br(course)
     
-    ns = create_ns_config(br, usernames)
-
-    create_netns(ns)
+    create_ns(br, usernames, course)
     
+    sys.exit(0)
 
 
 if __name__ == "__main__":

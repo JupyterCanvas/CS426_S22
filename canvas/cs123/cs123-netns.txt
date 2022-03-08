@@ -1,5 +1,5 @@
-ns-cs123-newellz2:10.0.123.10/24
-ns-cs123-sskidmore:10.0.123.11/24
-ns-cs123-zestreito:10.0.123.12/24
-ns-cs123-fgreen:10.0.123.13/24
-ns-cs123-vle:10.0.123.14/24
+cs123-newellz2:ns12310:10.0.123.10/24
+cs123-sskidmore:ns12311:10.0.123.11/24
+cs123-zestreito:ns12312:10.0.123.12/24
+cs123-fgreen:ns12313:10.0.123.13/24
+cs123-vle:ns12314:10.0.123.14/24
