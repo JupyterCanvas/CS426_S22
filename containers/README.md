@@ -290,3 +290,71 @@ vncserver -kill :1 # use display num listed above
         novnc
 ```
 
+---
+### Set up container networking
+By default, Singularity runs containers in host network namespace:
+```bash
+singularity shell -w debian
+apt install -y iproute2 iputils-ping # for ip command, ping
+ip a # same ip as host
+# can ssh to host and run container, but need to ssh directly to container
+# needs unique ip addr/network namespace
+```
+ Singularity offers network virtualization --net option to join a new nework ns, but the net flag can only be used by root, need network namespace for unprivledged users.
+- create veth pair and network namespace:
+```bash
+# on host, not in container: create new network namespace with veth to bridge
+
+# create namespace
+ip netns add ns0
+
+# create bridge
+ip link add br0 type bridge
+# assign bridge ip
+ip link set br0 up
+ip addr add 10.0.123.1/24 dev br0
+
+# create veth pair
+ip link add v0-l type veth peer name v0-r
+# add v0-l to bridge
+ip link set v0-l up
+ip link set v0-l master br0
+# add v0-r to ns0
+ip link set v0-r netns ns0
+# assign v0-r (container) ip and default route through bridge
+ip netns exec ns0 ip link set lo up
+ip netns exec ns0 ip link set v0-r up
+ip netns exec ns0 ip addr add 10.0.123.10/24 dev v0-r
+ip netns exec ns0 ip route add default via 10.0.123.1
+
+# check 
+ip a
+# on host, not in container:
+ping 10.0.123.10     # works, can ping veth ip in ns0 namespace
+# run container in network namespace ns0:
+ip netns exec ns0 singularity shell -w debian
+# in container:
+> ip a
+> ping 10.0.123.1    # works, can ping veth ip in host namespace
+> ping 192.168.161.131  # works, can ping vm host
+> ping 8.8.8.8          # doesn't work, can't ping outside of network
+> exit
+
+# need to setup ip forwarding and nat 
+# on host, not in container:
+sysctl -w net.ipv4.ip_forward=1
+apt install -y iptables
+iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
+ip netns exec ns0 singularity shell -w debian
+# in container: 
+> ping 8.8.8.8 # works!
+> ping google.com # works too!
+> exit
+```
+---
+- > .DEF CHANGES:
+```bash
+# (in %post, apt installs):
+        iproute2 iputils-ping
+```
+
