@@ -18,7 +18,8 @@ From: debian:bullseye
         locales \
         firefox-esr pciutils libegl-dev \
         xfce4 xfce4-terminal mousepad dbus-x11 \
-        wget libegl1-mesa
+        wget libegl1-mesa \
+	novnc 
 
     # set default locale
     echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
