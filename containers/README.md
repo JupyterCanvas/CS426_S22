@@ -253,3 +253,40 @@ vncserver -kill :1
     rm turbovnc_2.2.7_amd64.deb
 ```
 
+---
+### Install NoVNC+websocify
+shell back in:
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> apt install -y novnc # installs websocify too
+# websocify = WebSockets to TCP socket proxy
+> vncserver
+> websockify -D --web /usr/share/novnc/ 6080 localhost:5901
+# -D flag runs a daemon in bkgd, leave off to see output
+```
+- in a web browser:
+```bash
+192.168.161.131:6080/vnc.html
+# login with turbovnc password
+```
+> Can access container through URL!
+
+- in container:
+```bash
+lsof -i -P -n | grep LISTEN
+# look for websockify, process id is first #
+kill <pid>
+vncserver -list
+vncserver -kill :1 # use display num listed above
+```
+
+---
+- > .DEF CHANGES: isntall novnc+websockify
+```bash
+# (in %post, apt installs):
+        novnc
+```
+
