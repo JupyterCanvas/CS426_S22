@@ -1,8 +1,13 @@
 Bootstrap: library
 From: debian:bullseye
 
+%files
+    files/sources.list /etc/apt
+
 %post
     echo "Hello from inside the container"
+    apt update
+    apt install -y vim
 
 %runscript
     echo "This is what happens when you run the container..."
