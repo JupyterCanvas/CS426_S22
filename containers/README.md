@@ -104,3 +104,25 @@ singularity shell --writable debian
     update-locale LANG=en_US.UTF-8
 ```
 
+---
+shell back in:
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> date
+# date shows correct TZ, but /etc/localtime and /etc/timezone don't,
+# were updated by tzdata update in upgrade
+```
+***ISSUES:***
+
+5. need to reconfigure tzdata
+- > .DEF CHANGES: link localtime, set timezone, noninteractive reconfigure tzdata
+```bash
+# (in %post)
+    ln -snf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+    echo America/Los_Angeles > /etc/timezone
+    dpkg-reconfigure --frontend noninteractive tzdata
+```
+
