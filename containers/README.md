@@ -59,3 +59,48 @@ singularity shell --writable debian
     apt install -y vim
 ```
 
+---
+shell back in:
+```bash
+singularity shell --writable debian
+```
+```bash
+# in container:
+> apt upgrade
+# get multiple errors related to debconf:
+# debconf: unable to initialize frontend:
+# debconf doesn't realize it's running non-interactively, trying to open dialog for user input
+
+> export DEBIAN_FRONTEND=noninteractive
+> apt upgrade
+
+# debconf errors gone, gets farther in tzdata update, stalls at:
+# perl: warning: Setting locale failed.
+# perl: warning: Please check that your locale settings:
+#        LANGUAGE = (unset),
+#        LC_ALL = (unset),
+#        LANG = "en_US.UTF-8"
+#    are supported and installed on your system.
+```
+***ISSUES:***
+
+3. need to set apt to noninteractive install
+4. need to install and set locales
+- > .DEF CHANGES: set noninteractive, install and configure locales:
+```bash
+%post
+    echo "Hello from inside the container"
+
+    # set apt to noninteractive install
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt update && apt upgrade -y
+    apt install -y vim \
+        locales
+
+    # set default locale
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen en_US.utf8
+    update-locale LANG=en_US.UTF-8
+```
+
