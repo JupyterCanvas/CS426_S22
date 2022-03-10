@@ -19,5 +19,10 @@ From: debian:bullseye
     locale-gen en_US.utf8
     update-locale LANG=en_US.UTF-8
 
+    # set timezone
+    ln -snf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+    echo America/Los_Angeles > /etc/timezone
+    dpkg-reconfigure --frontend noninteractive tzdata
+
 %runscript
     echo "This is what happens when you run the container..."
