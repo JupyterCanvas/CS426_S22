@@ -313,7 +313,7 @@ vncserver -kill :1 # use display num listed above
 # remote VNC access stage 2:
 ## NoVNC + Websockify (HTML-VNC client with websockets served from container, remote user just needs browser to access, not a VNC client):
 ```
-browser vnc.html --> websocket :6080 --> websockify --> NoVNC :5900 --> TurboVNC Sever
+browser :6080/vnc.html --> websocket :6080 --> websockify --> NoVNC :5900 --> TurboVNC Sever
 ```
 ```bash
 can access container through URL with port

@@ -23,13 +23,15 @@ server {
 
 	# path to URL where it will be viewed (http://192.168.161.131/mynovnc/vnc.html)
 	location /mynovnc {
-		proxy_pass http://10.0.123.10:6080/;
+		# proxy_pass http://10.0.123.10:6080/; # websockify from container
+		proxy_pass http://192.168.161.131:6080/; # websockify from server
 	}
 
 	# path to websockify to proxy the websocket connection
 	location /websockify {
 		proxy_http_version 1.1;
-		proxy_pass http://10.0.123.10:6080/;
+		# proxy_pass http://10.0.123.10:6080/; # websockify from container
+		proxy_pass http://192.168.161.131:6080/; # websockify from server
 		proxy_set_header Upgrade $http_upgrade;
 		proxy_set_header Connection "upgrade";
 
