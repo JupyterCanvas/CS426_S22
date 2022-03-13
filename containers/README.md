@@ -395,5 +395,69 @@ ip netns exec ns0 singularity shell -w debian
 ```
 ---
 
-# See Basic NGINX Reverse Proxy setup in [Web Server Config](../nginx/README.md)
+
+---
+---
+
+# remote VNC access stage 3: 
+## NGINX reverse proxy NoVNC+websockify
+(see [NGINX Config](../nginx/README.md))
+```
+browser /mynovnc --> websocket :6080 --> websockify --> NoVNC :5900 --> TurvoVNC Server
+```
+```bash
+can access container through URL without port
+# in container: 
+vncserver
+websockify --web /usr/share/novnc/ 6080 10.0.123.10:5901
+
+# on a remote machine: 
+192.168.161.131/mynovnc/vnc.html
+```
+---
+---
+
+# remote VNC access stage 4:
+## Websockify with token files
+(see [NGINX Config](../nginx/README.md))
+```
+browser /uniqueURLwithToken --> websocket :6080 --> websockify --> NoVNC :5900 --> TurvoVNC Server
+```
+```bash
+can access container with token (unique URL)
+# in container: 
+# /usr/local/websockify/token/t1 = "token1: 10.0.123.10:5901
+vncserver
+websockify --web /usr/share/novnc/ --token-plugin=TokenFile --token-source=/usr/local/websockify/token/t1 6080
+
+# on a remote machine:
+http://192.168.161.131/mynovnc/vnc.html?path=/websockify?token=token1
+```
+
+---
+---
+
+# remote VNC access stage 5:
+## Websockify from server with user token files (unique URLs)
+(see [NGINX Config](../nginx/README.md))
+```
+browser /uniqueURLwithToken --> server websocket :6080 --> server websockify --> container NoVNC :5900 --> container TurvoVNC Server
+```
+```bash
+# in container: 
+vncserver
+
+# on server, not in container: 
+websockify --web /usr/share/novnc/ --token-plugin=TokenFile --token-source=/usr/local/websockify/token/t1 6080
+
+# on a remote machine: 
+http://192.168.161.131/index.html
+# click link, or use url directly: 
+http://192.168.161.131/mynovnc/vnc.html?path=/websockify?token=token1
+# vncserver stays running even if exit container shell. 
+# can exit shell and still access container vnc!
+```
+---
+---
+
 
