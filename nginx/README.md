@@ -49,4 +49,60 @@ curl localhost/test
 # can also check in browser: 
 # 192.168.161.131/test
 ```
+---
+
+### Setup basic reverse proxy with NGINX
+```bash
+# on server, not in container: 
+
+vim /etc/nginx/sites-available/default
+# setup NoVNC to be served through http://ip.of.server/mynovnc/vnc.html
+# Reverse proxy NoVNC+websockify:
+# adapted from https://github.com/novnc/noVNC/wiki/Proxying-with-nginx
+```
+```bash
+        # path to URL where it will be viewed (http://192.168.161.139/mynovnc/vnc.html)
+        location /mynovnc {
+                proxy_pass http://10.0.100.10:6080/;
+        }
+
+        # path to /websockify to proxy the websocket connection
+        location /websockify {
+                proxy_http_version 1.1;
+                proxy_pass http://10.0.123.10:6080/;
+                proxy_set_header Upgrade $http_upgrade;
+                proxy_set_header Connection "upgrade";
+
+                # VNC connection timeout
+                proxy_read_timeout 61s;
+
+                # Disable cache
+                proxy_buffering off;
+        }
+```
+check config and reload nginx:
+```bash
+nginx -t
+systemctl reload nginx
+```
+test: 
+```bash
+ip netns exec ns0 singularity shell -w debian
+# in container: 
+> vncserver
+> websockify --web /usr/share/novnc/ 6080 10.0.123.10:5901
+```
+in a browser: 
+```
+192.168.161.131/mynovnc/vnc.html
+```
+```bash
+# in container: 
+> CTRL-C
+> vncserver -kill :1
+> exit
+```
+***ISSUES:***
+> "/websockify" location needed by novnc, can't prepend or append to path. When can't access it get error, cannot connect to ws://192.168.161.131/websockify Need to find another way to proxy pass outside of websockify location or how to change path used by novnc??? 
+---
 

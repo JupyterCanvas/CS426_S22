@@ -18,6 +18,28 @@ server {
 		try_files $uri $uri/ $uri.html =404;
 	}
 
+	# Reverse proxy NoVNC+websockify:
+	# adapted from https://github.com/novnc/noVNC/wiki/Proxying-with-nginx
+
+	# path to URL where it will be viewed (http://192.168.161.131/mynovnc/vnc.html)
+	location /mynovnc {
+		proxy_pass http://10.0.123.10:6080/;
+	}
+
+	# path to websockify to proxy the websocket connection
+	location /websockify {
+		proxy_http_version 1.1;
+		proxy_pass http://10.0.123.10:6080/;
+		proxy_set_header Upgrade $http_upgrade;
+		proxy_set_header Connection "upgrade";
+
+		# VNC connection timeout
+		proxy_read_timeout 61s;
+
+		# Disable cache
+		proxy_buffering off;
+	}
+
 }
 
 
