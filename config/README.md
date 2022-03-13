@@ -230,3 +230,26 @@ parse_git_bg() {
   PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$\[$(parse_git_bg)\]$(__git_ps1)\[\033[0m\] '
 ```
 ---
+
+
+## Disable xdg default directories generation
+
+There is a utility xdg-user-dirs-update that creates directories when you start an X session: Downloads, Desktop, Videos, etc.. Delete unwanted directories and edit the ~/.config/user-dirs.dirs to suppress:
+```bash
+# remove Downloads Documents Music Public Templates Videos
+rm -r D* M* P* T* V*
+# vim ~/.config/user-dirs.dirs 
+XDG_DOWNLOAD_DIR="$HOME/"
+XDG_DESKTOP_DIR="$HOME/"
+XDG_TEMPLATES_DIR="$HOME/"
+XDG_PUBLICSHARE_DIR="$HOME/"
+XDG_DOCUMENTS_DIR="$HOME/"
+XDG_MUSIC_DIR="$HOME/"
+XDG_PICTURES_DIR="$HOME/"
+XDG_VIDEOS_DIR="$HOME/"
+# all paths now just home, no extra directories will be created when log in
+# save and run: 
+xdg-user-dirs-update
+# exit and login again to check 
+```
+---
