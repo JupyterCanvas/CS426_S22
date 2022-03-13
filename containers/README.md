@@ -1,3 +1,4 @@
+
 # Singularity container config
 ---
 ## create basic definition file
@@ -252,7 +253,24 @@ vncserver -kill :1
     dpkg -i turbovnc_2.2.7_amd64.deb
     rm turbovnc_2.2.7_amd64.deb
 ```
+---
+---
 
+# remote VNC access stage 1: 
+## TurboVNC (std VNC server from container to remote VNC client) through ssh tunnel: 
+```
+VNC Client (localhost:5901) --> SSH Client (remote:22) --]===ssh-tunnel===]--> (192.168.161.131:22) SSH Server --> (localhost:5901) TurboVNC Server
+```
+```bash
+tunnel VNC through SSH, sends all data through encrypted tunnel. 
+routes packets from localhost (port 5901) to the remote host (port 5901) through port 22: 
+# in container: 
+vncserver
+# on remote machine: 
+ssh -L 5901:localhost:5901 root@192.168.161.131
++ VNC session localhost:5901
+```
+---
 ---
 ### Install NoVNC+websocify
 shell back in:
@@ -289,7 +307,25 @@ vncserver -kill :1 # use display num listed above
 # (in %post, apt installs):
         novnc
 ```
+---
+---
 
+# remote VNC access stage 2:
+## NoVNC + Websockify (HTML-VNC client with websockets served from container, remote user just needs browser to access, not a VNC client):
+```
+browser vnc.html --> websocket :6080 --> websockify --> NoVNC :5900 --> TurboVNC Sever
+```
+```bash
+can access container through URL with port
+# in container: 
+vncserver
+websockify -D --web /usr/share/novnc/ 6080 localhost:5901
+
+# on remote machine: 
+192.168.161.131:6080/vnc.html
+# login with turbovnc password
+```
+---
 ---
 ### Set up container networking
 By default, Singularity runs containers in host network namespace:
@@ -327,7 +363,7 @@ ip netns exec ns0 ip link set v0-r up
 ip netns exec ns0 ip addr add 10.0.123.10/24 dev v0-r
 ip netns exec ns0 ip route add default via 10.0.123.1
 
-# check 
+# check
 ip a
 # on host, not in container:
 ping 10.0.123.10     # works, can ping veth ip in ns0 namespace
@@ -340,13 +376,13 @@ ip netns exec ns0 singularity shell -w debian
 > ping 8.8.8.8          # doesn't work, can't ping outside of network
 > exit
 
-# need to setup ip forwarding and nat 
+# need to setup ip forwarding and nat
 # on host, not in container:
 sysctl -w net.ipv4.ip_forward=1
 apt install -y iptables
 iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
 ip netns exec ns0 singularity shell -w debian
-# in container: 
+# in container:
 > ping 8.8.8.8 # works!
 > ping google.com # works too!
 > exit
@@ -357,4 +393,7 @@ ip netns exec ns0 singularity shell -w debian
 # (in %post, apt installs):
         iproute2 iputils-ping
 ```
+---
+
+# See Basic NGINX Reverse Proxy setup in [Web Server Config](../nginx/README.md)
 
