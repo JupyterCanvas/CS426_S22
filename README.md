@@ -9,7 +9,11 @@ by the University of Nevada Reno's CSE department and Cybersecurity Center.
 ---
 
 [Server Config](config/README.md)
+
 [Container Config](containers/README.md)
+
 [Web Server Config](nginx/README.md)
+
 [Canvas Config](canvas/README.md)
+
 [Systemd Config](systemd/README.md)
