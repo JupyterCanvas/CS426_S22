@@ -126,3 +126,23 @@ git status
 # have now merged updates from main branch into personal development branch
 # does not modify/update main branch in any way
 ```
+---
+
+## checking out remote branches: 
+```bash
+git checkout --track origin/branchname
+```
+
+## archiving branches: 
+```bash
+# create tag from branch
+git tag archive/branchname branchname 
+# list tags
+git tag
+# delete local branch
+git branch -d branchname
+# delete remote branch
+git push origin :branchname
+# push tag to remote
+git push --tags
+```
