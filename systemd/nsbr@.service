@@ -1,6 +1,9 @@
 [Unit]
 Description=Network namespace ns%i configuration
 Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+# Ensure namespace configured
+BindsTo=netns@%i.service
+After=netns@%i.service
 StopWhenUnneeded=true
 
 [Service]

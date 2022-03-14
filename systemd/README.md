@@ -1,4 +1,14 @@
+
 # Systemd config
+
+### Allow process running as an unprivileged user to use a private network namespace
+
+- Unprivledged users can not use ip netns exec when starting container. 
+
+- Let systemd create the namespace, subsequent units join namespace and subsequent joins can be unprivledged. 
+
+- Use systemd template units and EnvironmentFiles to create unit instances
+---
 
 ## Simple service example.service
 ```bash
@@ -98,6 +108,8 @@ Mar 13 21:46:51 jupytercanvas systemd[1]: Stopped Network bridge br-123.
 ```
 ---
 ## systemd service template to create network namespace
+- systemd does not support named network interfaces. Combine with ip netns namespaces to work around (source https://github.com/systemd/systemd/issues/2741#issuecomment-433979748)
+
 ```bash
 vim /etc/systemd/system/netns@.service
 ```
@@ -228,5 +240,86 @@ Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:                 ||----w |
 Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:                 ||     ||
 Mar 13 23:22:51 jupytercanvas systemd[1]: testnetns@12310.service: Succeeded.
 ```
+---
+
+## Link instance service dependencies: 
+
+- Use systemd BindTo+After in testnetns and nsbr services to link instance dependencies: 
+```bash
+vim /etc/systemd/system/nsbr@.service
+```
+```bash
+# in [Unit]
+# Ensure namespace configured
+BindsTo=netns@%i.service
+After=netns@%i.service
+```
+```bash
+vim /etc/systemd/system/testnetns@.service
+```
+```bash
+# in [Unit]
+# Ensure network is configured
+BindsTo=nsbr@%i.service
+After=nsbr@%i.service
+```
+```bash
+ip netns delete ns12310
+systemctl start testnetns@12310.service
+systemctl status testnetns@12310.service
+```
+```bash
+● testnetns@12310.service - Test service template join netns
+     Loaded: loaded (/etc/systemd/system/testnetns@.service; static)
+     Active: inactive (dead)
+
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:  _________________________________________
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]: / ping google.com from ns: 10.0.123.10/24 \
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]: \ (vr-12310) 0% packet loss               /
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:  -----------------------------------------
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:         \   ^__^
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:          \  (oo)\_______
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:             (__)\       )\/\
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:                 ||----w |
+Mar 14 00:01:08 jupytercanvas pingcow.sh[133844]:                 ||     ||
+Mar 14 00:01:08 jupytercanvas systemd[1]: testnetns@12310.service: Succeeded.
+```
+`systemctl start testnetns@12310.service` starts: 
+- an instance of the testnetns service, 
+- it also creates a nsbr@12310.service instance, 
+- which creates a netns@12310.service instance. 
+- only call the sub unit service and its dependencies are generated automatically.
+```bash
+root@jupytercanvas:/etc/systemd/system# systemctl status nsbr@12310.service
+● nsbr@12310.service - Network namespace ns12310 configuration
+     Loaded: loaded (/etc/systemd/system/nsbr@.service; static)
+     Active: inactive (dead)
+       Docs: https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+
+Mar 14 00:01:08 jupytercanvas systemd[1]: Starting Network namespace ns12310 configuration...
+Mar 14 00:01:08 jupytercanvas systemd[1]: Finished Network namespace ns12310 configuration.
+Mar 14 00:01:08 jupytercanvas systemd[1]: nsbr@12310.service: Succeeded.
+Mar 14 00:01:08 jupytercanvas systemd[1]: Stopped Network namespace ns12310 configuration.
+```
+```bash
+root@jupytercanvas:/etc/systemd/system# systemctl status netns@12310.service
+● netns@12310.service - Named network namespace ns12310
+     Loaded: loaded (/etc/systemd/system/netns@.service; static)
+     Active: inactive (dead)
+       Docs: https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+
+Mar 14 00:01:07 jupytercanvas systemd[1]: Starting Named network namespace ns12310...
+Mar 14 00:01:08 jupytercanvas systemd[1]: Finished Named network namespace ns12310.
+Mar 14 00:01:08 jupytercanvas systemd[1]: netns@12310.service: Succeeded.
+Mar 14 00:01:08 jupytercanvas systemd[1]: Stopped Named network namespace ns12310.
+```
+**The network bridge is not part of the dependency stack. Run the bridge service before the netns services. (systemtl start netbr@123.service)**
+
+Cleanup: Removing the network namespace also removes the veth pair
+    
+`ip netns list`
+    
+`ip netns delete ns12310`
+
 ---
 
