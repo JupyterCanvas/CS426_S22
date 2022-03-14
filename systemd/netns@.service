@@ -1,0 +1,32 @@
+# Create user network namespaces: 
+# systemd creates ns, subsequent unprivledged units can join namespace
+# subsequent units use NetworkNamespacePath=/var/run/netns/ns%i in [Service] sect
+
+[Unit]
+Description=Named network namespace ns%i
+Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+StopWhenUnneeded=true
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Ask systemd to create a network namespace
+PrivateNetwork=yes
+
+# systemd does not support naming network namespaces
+# work around by assigning ip netns namespace name to systemd namespace:
+
+# Ask ip netns to create a named network namespace
+# (This ensures that things like /var/run/netns are properly setup)
+#ExecStart=/sbin/ip netns add ns%i
+# (Why flock? See https://bugs.debian.org/949235
+# a race condition in ip netns can result in mount point havoc if ip netns add 
+# is run for the first time from multiple processes simultaneously)
+ExecStart=/usr/bin/flock --no-fork -- /var/run/netns.lock /bin/ip netns add ns%i
+
+# Drop the network namespace that ip netns just created
+ExecStart=/bin/umount /var/run/netns/ns%i
+
+# Re-use the same name for the network namespace that systemd put us in
+ExecStart=/bin/mount --bind /proc/self/ns/net /var/run/netns/ns%i

@@ -97,4 +97,62 @@ Mar 13 21:46:51 jupytercanvas systemd[1]: netbr@123.service: Succeeded.
 Mar 13 21:46:51 jupytercanvas systemd[1]: Stopped Network bridge br-123.
 ```
 ---
+## systemd service template to create network namespace
+```bash
+vim /etc/systemd/system/netns@.service
+```
+```bash
+# Create user network namespaces:
+# systemd creates ns, subsequent unprivledged units can join namespace
+# subsequent units use NetworkNamespacePath=/var/run/netns/ns%i in [Service] sect
+
+[Unit]
+Description=Named network namespace ns%i
+Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+StopWhenUnneeded=true
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+# Ask systemd to create a network namespace
+PrivateNetwork=yes
+
+# systemd does not support naming network namespaces
+# work around by assigning ip netns namespace name to systemd namespace:
+
+# Ask ip netns to create a named network namespace
+# (This ensures that things like /var/run/netns are properly setup)
+#ExecStart=/sbin/ip netns add ns%i
+# (Why flock? See https://bugs.debian.org/949235
+# a race condition in ip netns can result in mount point havoc if ip netns add
+# is run for the first time from multiple processes simultaneously)
+ExecStart=/usr/bin/flock --no-fork -- /var/run/netns.lock /bin/ip netns add ns%i
+
+# Drop the network namespace that ip netns just created
+ExecStart=/bin/umount /var/run/netns/ns%i
+
+# Re-use the same name for the network namespace that systemd put us in
+ExecStart=/bin/mount --bind /proc/self/ns/net /var/run/netns/ns%i
+```
+```bash
+systemctl start netns@123.service
+systemctl status netns@123.service
+```
+```bash
+● netns@123.service - Named network namespace ns123
+     Loaded: loaded (/etc/systemd/system/netns@.service; static)
+     Active: inactive (dead)
+       Docs: https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+
+Mar 13 22:05:02 jupytercanvas systemd[1]: Starting Named network namespace ns123...
+Mar 13 22:05:02 jupytercanvas systemd[1]: Finished Named network namespace ns123.
+Mar 13 22:05:02 jupytercanvas systemd[1]: netns@123.service: Succeeded.
+Mar 13 22:05:02 jupytercanvas systemd[1]: Stopped Named network namespace ns123.
+```
+```bash
+ip netns list
+# ns123
+```
+---
 
