@@ -218,4 +218,79 @@ Removed user: cs123-fgreen
 Removed user: cs123-vle
 ```
 ---
+## Setup systemd service templates, see [Systemd Config](systemd/README.md)
+---
+## Create user network namespaces with systemd instances
+```bash
+./05-create_namespaces.py
+#
+usage: 05-create_namespaces.py [-h] passwd_list
+05-create_namespaces.py: error: the following arguments are required: passwd_list
+```
+```bash
+./05-create_namespaces.py -h
+#
+usage: 05-create_namespaces.py [-h] passwd_list
+
+Create network namespaces for user containers
+
+positional arguments:
+  passwd_list  List of usernames in a text file run add_users.py to generate cs123/cs123-pass.txt
+
+optional arguments:
+  -h, --help   show this help message and exit
+
+To enable ip forwarding and nat for network access in container
+server should have the following set:
+(this is ephemeral, should change to persistent/load at boot)
+
+    sysctl -w net.ipv4.ip_forward=1
+    iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
+check with:
+    sysctl net.ipv4.ip_forward
+    iptables -L -t nat -v -n
+```
+output: 
+```bash
+./05-create_namespaces.py cs123/cs123-pass.txt
+#
+Bridge br123 created for cs123, ip=10.0.123.1/24
+Network namespace ns12310 created for cs123-newellz2, ip=10.0.123.10/24
+Network namespace ns12311 created for cs123-sskidmore, ip=10.0.123.11/24
+Network namespace ns12312 created for cs123-zestreito, ip=10.0.123.12/24
+Network namespace ns12313 created for cs123-fgreen, ip=10.0.123.13/24
+Network namespace ns12314 created for cs123-vle, ip=10.0.123.14/24
+
+         file created: cs123/cs123-netns.txt
+```
+creates list of yser namespaces and ips:
+```bash 
+cat cs123/cs123-netns.txt
+#
+cs123-newellz2:ns12310:10.0.123.10/24
+cs123-sskidmore:ns12311:10.0.123.11/24
+cs123-zestreito:ns12312:10.0.123.12/24
+cs123-fgreen:ns12313:10.0.123.13/24
+cs123-vle:ns12314:10.0.123.14/24
+```
+```bash
+# check network configuration of namespaces: 
+
+systemctl status testnetns@12310.service
+● testnetns@12310.service - Test service template join netns
+     Loaded: loaded (/etc/systemd/system/testnetns@.service; static)
+     Active: inactive (dead)
+
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:  _________________________________________
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]: / ping google.com from ns: 10.0.123.10/24 \
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]: \ (vr-12310) 0% packet loss               /
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:  -----------------------------------------
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:         \   ^__^
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:          \  (oo)\_______
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:             (__)\       )\/\
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:                 ||----w |
+Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:                 ||     ||
+Mar 14 00:48:32 jupytercanvas systemd[1]: testnetns@12310.service: Succeeded.
+```
+---
 
