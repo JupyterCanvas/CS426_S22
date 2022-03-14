@@ -193,4 +193,40 @@ ping 10.0.123.10 # can ping namespace (connection from server to namespace)
 ip netns exec ns12310 ping google.com # can ping google from namespace (ip forwarding, internet acces)
 ```
 ---
+## systemd service template to test networking in namespaces
+```bash
+vim /etc/systemd/system/testnetns@.service
+```
+```bash
+[Unit]
+Description=Test service template join netns
+
+[Service]
+NetworkNamespacePath=/var/run/netns/ns%i
+# Service now running inside the ns%i named network namespace
+
+# pings google.com from inside container to test network config
+ExecStart=/etc/systemd/system/scripts/pingcow.sh
+```
+```bash
+systemctl start testnetns@12310.service
+systemctl status testnetns@12310.service
+```
+```bash
+● testnetns@12310.service - Test service template join netns
+     Loaded: loaded (/etc/systemd/system/testnetns@.service; static)
+     Active: inactive (dead)
+
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:  _________________________________________
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]: / ping google.com from ns: 10.0.123.10/24 \
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]: \ (vr-12310) 0% packet loss               /
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:  -----------------------------------------
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:         \   ^__^
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:          \  (oo)\_______
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:             (__)\       )\/\
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:                 ||----w |
+Mar 13 23:22:51 jupytercanvas pingcow.sh[132939]:                 ||     ||
+Mar 13 23:22:51 jupytercanvas systemd[1]: testnetns@12310.service: Succeeded.
+```
+---
 

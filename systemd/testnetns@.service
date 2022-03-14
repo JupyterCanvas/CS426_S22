@@ -1,0 +1,9 @@
+[Unit]
+Description=Test service template join netns
+
+[Service]
+NetworkNamespacePath=/var/run/netns/ns%i
+# Service now running inside the ns%i named network namespace
+
+# pings google.com from inside container to test network config
+ExecStart=/etc/systemd/system/scripts/pingcow.sh
