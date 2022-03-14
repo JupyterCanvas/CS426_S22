@@ -155,4 +155,42 @@ ip netns list
 # ns123
 ```
 ---
+## systemd service template to setup networking in network namespaces
+```bash
+vim /etc/systemd/system/nsbr@.service
+```
+```bash
+[Unit]
+Description=Network namespace ns%i configuration
+Documentation=https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+StopWhenUnneeded=true
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/systemd/system/netns/ns%i.conf
+
+# setup networking in ns: bridge <- veth -> container
+ExecStart=/etc/systemd/system/scripts/netns.sh ns%i vl-%i vr-%i ${VR_IP} ${BR} ${BR_IP}
+```
+```bash
+sytemctl start nsbr@12310.service
+sytemctl status nsbr@12310.service
+```
+```bash
+● nsbr@12310.service - Network namespace ns12310 configuration
+     Loaded: loaded (/etc/systemd/system/nsbr@.service; static)
+     Active: inactive (dead)
+       Docs: https://github.com/systemd/systemd/issues/2741#issuecomment-433979748
+
+Mar 13 22:30:12 jupytercanvas systemd[1]: Starting Network namespace ns12310 configuration...
+Mar 13 22:30:12 jupytercanvas systemd[1]: Finished Network namespace ns12310 configuration.
+Mar 13 22:30:12 jupytercanvas systemd[1]: nsbr@12310.service: Succeeded.
+Mar 13 22:30:12 jupytercanvas systemd[1]: Stopped Network namespace ns12310 configuration.
+```
+```bash
+ping 10.0.123.10 # can ping namespace (connection from server to namespace)
+ip netns exec ns12310 ping google.com # can ping google from namespace (ip forwarding, internet acces)
+```
+---
 
