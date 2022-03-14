@@ -71,4 +71,54 @@ output:
 ```
 > Can use section ids to pull enrollments by section instead of course to create resources customized by section
 ---
+## Find Canvas course enrolled netids with course id:
+```bash
+./03-get_course_enrollments.py
+# prompts user for course id:
+usage: 03-get_course_enrollments.py [-h] course_id
+03-get_course_enrollments.py: error: the following arguments are required: course_id
+```
+```bash
+./03-get_course_enrollments.py -h
+# provides help flag: 
+usage: 03-get_course_enrollments.py [-h] course_id
+
+Find Canvas course enrolled netids with course id:
+  (run find_course_id.py to get the course id #)
+  Generates:
+    COURSE = subject and number string, i.e. "cs135"
+    course directory in cwd: cs135/
+    text file with list of enrolled netids: cs135/cs135-netids.txt
+        file header = COURSE:course_id:timestamp
+        netids grouped by role: instructors, tas, students
+
+positional arguments:
+  course_id   Canvas course id #. Run find_course_id.py to get #
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+output:
+```bash
+./03-get_course_enrollments.py 44240000000083090
+Making request...
+
+         file created: cs123/cs123-netids.txt
+```
+creates list of netids sorted by role: 
+```bash
+cat cs123/cs123-netids.txt
+```
+```bash
+cs123:44240000000083090:22-03-13 08:03 PM
+# instructors:
+newellz2
+sskidmore
+zestreito
+# tas:
+fgreen
+# students:
+vle
+```
+---
 
