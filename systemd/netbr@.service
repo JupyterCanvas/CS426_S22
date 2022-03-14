@@ -6,7 +6,7 @@ StopWhenUnneeded=true
 Type=oneshot
 RemainAfterExit=yes
 # netns/bridge123.conf stores ip:
-# BR_IP=10.0.123.1
+# BR_IP=10.0.123.1/24
 EnvironmentFile=/etc/systemd/system/netns/bridge-%i.conf
 
 # create bridge
