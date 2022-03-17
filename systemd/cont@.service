@@ -6,6 +6,8 @@ Description=Generate container instance
 Type=forking
 # consider the unit to be active if the start action exited successfully
 RemainAfterExit=yes
+# run as user
+User=cs123-newellz2
 
 # start singularity instance
 ExecStart=/usr/local/bin/singularity instance start /data/containers/alpine_latest.sif inst-%i

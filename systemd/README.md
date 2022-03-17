@@ -361,4 +361,30 @@ singularity instance list
 systemctl status cont@test123.service
 ```
 ---
+## generate a container instance as an unprivledged user
+
+- Add user to container service template: 
+```bash
+vim /etc/systemd/system/cont@.service
+```
+```bash
+# in [Service] section: 
+User=cs123-newellz2
+```
+```bash
+# reload config
+systemctl daemon-reload
+systemctl start cont@123.service
+systemctl status cont@123.service
+# Instances started by another user won't be listed when singularity list called by root:
+singularity instance list # no results
+# Instances are linked with the user account that started them:
+su cs123-newellz2
+singularity instance list # shows inst-123 instance
+singularity shell instance://inst-123
+whoami 
+exit # from container
+exit # from user (back to root)
+```
+---
 
