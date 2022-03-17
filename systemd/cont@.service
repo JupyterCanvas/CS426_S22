@@ -1,0 +1,14 @@
+[Unit]
+Description=Generate container instance
+
+[Service]
+# forking because 'instance start' starts an instance and exits
+Type=forking
+# consider the unit to be active if the start action exited successfully
+RemainAfterExit=yes
+
+# start singularity instance
+ExecStart=/usr/local/bin/singularity instance start /data/containers/alpine_latest.sif inst-%i
+
+# stop singularity instance
+ExecStop=/usr/local/bin/singularity instance stop inst-%i

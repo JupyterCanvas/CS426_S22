@@ -322,4 +322,43 @@ Cleanup: Removing the network namespace also removes the veth pair
 `ip netns delete ns12310`
 
 ---
+## simple systemd service template to generate a container instance from an image
+
+- Can't access systemd inside of container (for systemctl restart jupyter) 
+- Can run services such as vncserver or jupyter, but won't be able to manage them (become orphans)
+### To run services in a SingularityCE container, use instances that run in the background: 
+```bash
+vim /etc/systemd/system/cont@.service
+```
+```bash
+[Unit]
+Description=Generate container instance
+
+[Service]
+# forking because 'instance start' starts an instance and exits
+Type=forking
+# consider the unit to be active if the start action exited successfully
+RemainAfterExit=yes
+
+# start singularity instance
+ExecStart=/usr/local/bin/singularity instance start /data/containers/alpine_latest.sif inst-%i
+
+# stop singularity instance
+ExecStop=/usr/local/bin/singularity instance stop inst-%i
+```
+```bash
+# start instance 
+systemctl start cont@test123.service
+# check
+systemctl status cont@test123.service
+singularity instance list
+singularity shell instance://inst-test123
+cat /etc/os-release
+# stop instance
+systemctl stop cont@test123.service
+# check
+singularity instance list
+systemctl status cont@test123.service
+```
+---
 
