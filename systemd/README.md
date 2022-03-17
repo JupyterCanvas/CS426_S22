@@ -387,4 +387,27 @@ exit # from container
 exit # from user (back to root)
 ```
 ---
+## generate container instance as user in user network namespace
+
+```bash
+vim /etc/systemd/system/cont@.service
+```
+```bash
+# in [Service] section before ExecStart of singularity instance: 
+NetworkNamespacePath=/var/run/netns/ns%i
+# Service now running inside the ns%i named network namespace
+```
+```bash
+systemctl daemon-reload
+systemctl start cont@12310.service
+systemctl status cont@12310.service
+# Instances are linked with the user account that started them:
+su cs123-newellz2
+singularity instance list # shows inst-12310 instance
+singularity shell instance://inst-12310
+ip a # shows 10.0.123.10 ip of network namespace
+exit # from container
+exit # from user (back to root)
+```
+---
 

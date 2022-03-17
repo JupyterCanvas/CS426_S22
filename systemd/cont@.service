@@ -9,6 +9,10 @@ RemainAfterExit=yes
 # run as user
 User=cs123-newellz2
 
+NetworkNamespacePath=/var/run/netns/ns%i
+# Service now running inside the ns%i named network namespace
+
+
 # start singularity instance
 ExecStart=/usr/local/bin/singularity instance start /data/containers/alpine_latest.sif inst-%i
 
