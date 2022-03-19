@@ -17,7 +17,7 @@ EnvironmentFile=/etc/systemd/system/containers/inst-%i.conf
 User=%i
 
 # start singularity instance
-ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} /data/containers/alpine_latest.sif inst-%i
+ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} /data/containers/debian.sif inst-%i
 
 # stop singularity instance
 ExecStop=/usr/local/bin/singularity instance stop inst-%i
