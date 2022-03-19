@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+# for use by system admins/stub for future use in 
+# customization of conts/messages/notebooks by section
+
 # Returns list of section ids from course id
 # ./get_course_sections course_id#
 # (run find_course_id.py to get course_id#)

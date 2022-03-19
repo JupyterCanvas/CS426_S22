@@ -23,6 +23,7 @@ parser = argparse.ArgumentParser(
             user subuid/subgid mapping for container fakeroot
             user home directories
             temporary passwords that users must change at first login
+            text file with list of usernames and OTPs: cs135/cs135-pass.txt
         '''),
         epilog=textwrap.dedent('''\
         To prevent accidental clobbering between course containers, 

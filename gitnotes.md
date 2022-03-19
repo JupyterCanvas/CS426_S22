@@ -146,3 +146,16 @@ git push origin :branchname
 # push tag to remote
 git push --tags
 ```
+
+## re-creating branches from tags: 
+```bash
+# had left send_canvas_email.py out of rebuild
+# hadn't realized tags would be compressed/unviewable on github
+# creating an archive branch for acces to old branches
+# recreating a single branch from a tag: 
+git checkout -b archive archive/main-S
+# merging other archived tags into new branch: 
+git merge archive/container
+git merge archive/test-git
+```
+

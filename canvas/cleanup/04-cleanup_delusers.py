@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # remove users from server with list of netids
-# ./cleanup_delusers.py CS123/CS123-netids.txt
+# ./cleanup/cleanup_delusers.py CS123/CS123-netids.txt
 # (run get_course_enrollments.py to generate list file)
 
 import sys # for sys.exit, sys.argv

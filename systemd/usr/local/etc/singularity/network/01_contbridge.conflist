@@ -1,0 +1,27 @@
+{
+    "cniVersion": "1.0.0",
+    "name": "fakeroot",
+    "plugins": [
+        {
+            "type": "bridge",
+            "bridge": "br123",
+            "isGateway": true,
+            "ipMasq": true,
+            "ipam": {
+                "type": "host-local",
+                "subnet": "10.0.123.0/24",
+                "routes": [
+                    { "dst": "0.0.0.0/0" }
+                ]
+            }
+        },
+        {
+            "type": "firewall"
+        },
+        {
+            "type": "portmap",
+            "capabilities": {"portMappings": true},
+            "snat": true
+        }
+    ]
+}

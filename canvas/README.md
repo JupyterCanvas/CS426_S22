@@ -1,16 +1,15 @@
-
 # Create user containers from Canvas Course data
 
-## Find course id with search term: 
+## Find course id with search term:
 ```bash
 ./01_find_course.py
-# prompts user for search term: 
+# prompts user for search term:
 usage: 01_find_course.py [-h] searchterm [searchterm ...]
 01_find_course.py: error: the following arguments are required: searchterm
 ```
 ```bash
 ./01_find_course.py -h
-# provides help flag: 
+# provides help flag:
 usage: 01_find_course.py [-h] searchterm [searchterm ...]
 
 Find Canvas course id with search term:
@@ -33,7 +32,7 @@ Making request...
 
         1. COURSE_ID : 44240000000083090 : Project Jupyter
 ```
-> This needs initial administrator interaction for the selection of a course id, but we can assign course ids to users for subsequent use. 
+> This needs initial administrator interaction for the selection of a course id, but we can assign course ids to users for subsequent use.
 ---
 ## Find Canvas course section ids with course id:
 ```bash
@@ -58,9 +57,9 @@ optional arguments:
 
 Copy section id #s from the results.
 ```
-output: 
+output:
 ```bash
-./02-get_course_sections.py  44240000000081158 # CS 447 has ugrad and grad sections: 
+./02-get_course_sections.py  44240000000081158 # CS 447 has ugrad and grad sections:
 
 
         COURSE_ID  : 44240000000081158 : Spring 2022 CS 447/647
@@ -80,7 +79,7 @@ usage: 03-get_course_enrollments.py [-h] course_id
 ```
 ```bash
 ./03-get_course_enrollments.py -h
-# provides help flag: 
+# provides help flag:
 usage: 03-get_course_enrollments.py [-h] course_id
 
 Find Canvas course enrolled netids with course id:
@@ -105,7 +104,7 @@ Making request...
 
          file created: cs123/cs123-netids.txt
 ```
-creates list of netids sorted by role: 
+creates list of netids sorted by role:
 ```bash
 cat cs123/cs123-netids.txt
 ```
@@ -124,13 +123,13 @@ vle
 ## Add users to server from list of netids:
 ```bash
 ./04-add_users.py
-# prompts user for netID list: 
+# prompts user for netID list:
 usage: 04-add_users.py [-h] netid_list
 04-add_users.py: error: the following arguments are required: netid_list
 ```
 ```bash
 ./04-add_users.py -h
-# provides help flag: 
+# provides help flag:
 usage: 04-add_users.py [-h] netid_list
 
 Add users to server from list of netids
@@ -150,7 +149,7 @@ optional arguments:
 To prevent accidental clobbering between course containers,
 usernames are netids prepended with the course: cs123-sskidmore
 ```
-output: 
+output:
 ```bash
 ./04-add_users.py cs123/cs123-netids.txt
 Added user: cs123-newellz2
@@ -172,7 +171,7 @@ User must change password at next login: cs123-vle
 
          file created: cs123/cs123-pass.txt
 ```
-creates list of usernames and temporary passwords: 
+creates list of usernames and temporary passwords:
 ```bash
 cat cs123/cs123-pass.txt
 ```
@@ -183,7 +182,7 @@ cs123-zestreito:oldS3al24
 cs123-fgreen:d@mpWater31
 cs123-vle:spicyE)ge96
 ```
-forces user to set password at next login: 
+forces user to set password at next login:
 ```bash
 login cs123-newellz2
 Password:
@@ -191,7 +190,7 @@ You are required to change your password immediately (administrator enforced).
 Changing password for cs123-newellz2.
 Current password:
 ```
-### Script to delete users (undo add_users.py script): 
+### Script to delete users (undo add_users.py script):
 ```bash
 ./scripts/04-cleanup_delusers.py -h
 usage: 04-cleanup_delusers.py [-h] netid_list
@@ -210,7 +209,7 @@ optional arguments:
 ```
 ```bash
 ./scripts/04-cleanup_delusers.py cs123/cs123-netids.txt
-# output: 
+# output:
 Removed user: cs123-newellz2
 Removed user: cs123-sskidmore
 Removed user: cs123-zestreito
@@ -220,19 +219,31 @@ Removed user: cs123-vle
 ---
 ## Setup systemd service templates, see [Systemd Config](systemd/README.md)
 ---
-## Create user network namespaces with systemd instances
-```bash
-./05-create_namespaces.py
-#
-usage: 05-create_namespaces.py [-h] passwd_list
-05-create_namespaces.py: error: the following arguments are required: passwd_list
-```
-```bash
-./05-create_namespaces.py -h
-#
-usage: 05-create_namespaces.py [-h] passwd_list
+~~Create user network namespaces with systemd instances~~ 
+---
+Singularity rootless containers created with fakeroot option cannot use custom network namespace. Modified to use Singularity generated cni network config instead of manually creating network namespaces and container networking. 
 
-Create network namespaces for user containers
+---
+## Create user container instances with systemd 
+```bash
+./05-create_containers.py
+#
+usage: 05-create_containers.py [-h] passwd_list
+05-create_containers.py: error: the following arguments are required: passwd_list
+```
+```bash 
+./05-create_containers.py -h
+#
+usage: 05-create_containers.py [-h] passwd_list
+
+Create user containers from list of usernames:
+  (run add_users.py to generate passwd_list)
+  Generates:
+    cni config for course subnet bridge
+    user container config files
+    user container instance services
+    service to test networking config in user containers
+    text file with list of usernames and container ips: cs135/cs135-conts.txt
 
 positional arguments:
   passwd_list  List of usernames in a text file run add_users.py to generate cs123/cs123-pass.txt
@@ -240,57 +251,72 @@ positional arguments:
 optional arguments:
   -h, --help   show this help message and exit
 
-To enable ip forwarding and nat for network access in container
-server should have the following set:
-(this is ephemeral, should change to persistent/load at boot)
-
-    sysctl -w net.ipv4.ip_forward=1
-    iptables -t nat -A POSTROUTING -o ens33 -j MASQUERADE
-check with:
-    sysctl net.ipv4.ip_forward
-    iptables -L -t nat -v -n
+Run systemctl status testcont@username.service to check container networking
 ```
 output: 
 ```bash
-./05-create_namespaces.py cs123/cs123-pass.txt
+./05-create_containers.py cs123/cs123-pass.txt
 #
-Bridge br123 created for cs123, ip=10.0.123.1/24
-Network namespace ns12310 created for cs123-newellz2, ip=10.0.123.10/24
-Network namespace ns12311 created for cs123-sskidmore, ip=10.0.123.11/24
-Network namespace ns12312 created for cs123-zestreito, ip=10.0.123.12/24
-Network namespace ns12313 created for cs123-fgreen, ip=10.0.123.13/24
-Network namespace ns12314 created for cs123-vle, ip=10.0.123.14/24
+Container testcont@cs123-newellz2.service created for cs123-newellz2
+Container testcont@cs123-sskidmore.service created for cs123-sskidmore
+Container testcont@cs123-zestreito.service created for cs123-zestreito
+Container testcont@cs123-fgreen.service created for cs123-fgreen
+Container testcont@cs123-vle.service created for cs123-vle
 
-         file created: cs123/cs123-netns.txt
+         file created: cs123/cs123-conts.txt
 ```
-creates list of yser namespaces and ips:
+creates list of usernames and container ips: 
 ```bash 
-cat cs123/cs123-netns.txt
+cat cs123/cs123-conts.txt
 #
-cs123-newellz2:ns12310:10.0.123.10/24
-cs123-sskidmore:ns12311:10.0.123.11/24
-cs123-zestreito:ns12312:10.0.123.12/24
-cs123-fgreen:ns12313:10.0.123.13/24
-cs123-vle:ns12314:10.0.123.14/24
+cs123-newellz2:10.0.123.10
+cs123-sskidmore:10.0.123.11
+cs123-zestreito:10.0.123.12
+cs123-fgreen:10.0.123.13
+cs123-vle:10.0.123.14
 ```
-```bash
-# check network configuration of namespaces: 
-
-systemctl status testnetns@12310.service
-● testnetns@12310.service - Test service template join netns
-     Loaded: loaded (/etc/systemd/system/testnetns@.service; static)
+```bash 
+# check network config of container instances: 
+systemctl status testcont@cs123-newellz2.service
+● testcont@cs123-newellz2.service - Test container networking
+     Loaded: loaded (/etc/systemd/system/testcont@.service; static)
      Active: inactive (dead)
 
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:  _________________________________________
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]: / ping google.com from ns: 10.0.123.10/24 \
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]: \ (vr-12310) 0% packet loss               /
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:  -----------------------------------------
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:         \   ^__^
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:          \  (oo)\_______
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:             (__)\       )\/\
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:                 ||----w |
-Mar 14 00:48:32 jupytercanvas pingcow.sh[135735]:                 ||     ||
-Mar 14 00:48:32 jupytercanvas systemd[1]: testnetns@12310.service: Succeeded.
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]: / cs123-newellz2 is root in container \
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]: | ping google.com from container ip   |
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]: \ (10.0.123.10/24): 0% packet loss    /
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]:  -------------------------------------
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]:         \   ^__^
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]:          \  (oo)\_______
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]:             (__)\       )\/\
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]:                 ||----w |
+Mar 19 14:02:40 jupytercanvas pingcow.sh[189334]:                 ||     ||
+Mar 19 14:02:40 jupytercanvas systemd[1]: testcont@cs123-newellz2.service: Succeeded.
+```
+---
+### Script to remove containers (undo create_containers.py script)
+```bash
+./cleanup/05-remove_containers.py -h
+#
+usage: 05-remove_containers.py [-h] passwd_list
+
+Remove containers created with create_containers.py
+
+positional arguments:
+  passwd_list  List of usernames in a text file run add_users.py to generate cs123/cs123-pass.txt
+
+optional arguments:
+  -h, --help   show this help message and exit
+```
+output: 
+```bash
+./cleanup/05-remove_containers.py cs123/cs123-pass.txt
+#
+Container cont@cs123-newellz2.service stopped
+Container cont@cs123-sskidmore.service stopped
+Container cont@cs123-zestreito.service stopped
+Container cont@cs123-fgreen.service stopped
+Container cont@cs123-vle.service stopped
 ```
 ---
 

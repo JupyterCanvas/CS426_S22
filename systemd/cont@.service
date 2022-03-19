@@ -1,20 +1,24 @@
 [Unit]
-Description=Generate container instance
+Description=Generate fakeroot container instance with IP in own network namespace
 
 [Service]
 # forking because 'instance start' starts an instance and exits
 Type=forking
 # consider the unit to be active if the start action exited successfully
 RemainAfterExit=yes
+
+# containers/inst-username.conf stores ip:
+# IP="IP=10.0.123.10"
+EnvironmentFile=/etc/systemd/system/containers/inst-%i.conf
+
 # run as user
-User=cs123-newellz2
-
-NetworkNamespacePath=/var/run/netns/ns%i
-# Service now running inside the ns%i named network namespace
-
+#User=cs123-newellz2
+# can't set user with environment file, has to be with %i
+User=%i
 
 # start singularity instance
-ExecStart=/usr/local/bin/singularity instance start /data/containers/alpine_latest.sif inst-%i
+ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} /data/containers/alpine_latest.sif inst-%i
 
 # stop singularity instance
 ExecStop=/usr/local/bin/singularity instance stop inst-%i
+
