@@ -113,19 +113,22 @@ def create_inst_config(subnet, usernames):
     host = 10
     
     instances = []
+    num = 1
     for user in usernames: 
         # generate instance config file for each user
         filename = f"/etc/systemd/system/containers/inst-{user}.conf"
         inst_ip = network + "." + str(host)
-        conf = f'IP="IP={inst_ip}"\n'
+        conf = f'IP="IP={inst_ip}"\nVNCP={num}\n'
     
         with open(filename, 'w') as fout:
             fout.write(conf)
 
         # create list of user instance ips
-        inst = user + ":" + inst_ip # cs123-newellz2:10.0.123.10
+        port = str(num + 5900)
+        inst = user + ":" + inst_ip + ":" + port # cs123-newellz2:10.0.123.10:5901
         instances.append(inst)
         host += 1
+        num += 1
     
     return instances
         
@@ -134,10 +137,18 @@ def create_instances(usernames):
     
     for user in usernames:
         # testcont@.service starts cont@.service and checks networking
+        depinst = f"cont@{user}.service"
+        # reload in case unit changed
+        subprocess.run(["systemctl", "daemon-reload"], stdout=PIPE)
+        # stop cont instance in case already running
+        subprocess.run(["systemctl", "stop", depinst], stdout=PIPE)
+        # only need to stop services and super units that remain after exit
+        # testcont stops after initial run, any start command will completely restart
+        # start testcont for instance (starts cont for instance)
         instance = f"testcont@{user}.service"
         p = subprocess.run(["systemctl", "start", instance], stdout=PIPE)
         if p.returncode == 0:
-            logger.info("Container " + instance + " created for " + user)
+            logger.info("Container " + depinst + " created for " + user)
         else:
             logger.info("Error creating container for " + user)
 
@@ -150,7 +161,7 @@ def main():
     br = create_br_config(course)
 
     instances = create_inst_config(br[1], usernames)
-
+    
     create_instances(usernames)
 
     # create file with list of instnace name:ip for each user

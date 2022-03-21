@@ -59,5 +59,12 @@ def main():
 
     stop_instances(usernames)
 
+    # kill leftover vncserver locks in /tmp:
+    p = subprocess.run(["/root/git/canvas/killvnc.sh"], stdout=PIPE)
+    if p.returncode == 0:
+        logger.info("Leftover vncservers killed")
+    else:
+        logger.info("Error removing leftover vncservers")
+
 if __name__ == "__main__":
     main()

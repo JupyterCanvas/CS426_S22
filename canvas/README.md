@@ -319,4 +319,78 @@ Container cont@cs123-fgreen.service stopped
 Container cont@cs123-vle.service stopped
 ```
 ---
+### Create user urls and vncservers
+
+Generate tokens for user urls, create course index page of user urls, start user vncservers
+```bash 
+./06-create_urls.py -h
+#
+usage: 06-create_urls.py [-h] instance_list
+
+Create urls for users to access vnc web sessions of their containers:
+  (run create_containers.py to generate instance_list)
+  Generates:
+    user token for websockify url
+    course tokens file for websockify
+    url for user to access vnc web session of container
+    course index html file with user urls (for instructors)
+    starts and tests vncservers in container instances
+    text file with list of usernames and urls: cs135/cs135-urls.txt
+
+positional arguments:
+  instance_list  List of container instances in a text file run create_containers.py to generate cs123/cs123-conts.txt
+
+optional arguments:
+  -h, --help     show this help message and exit
+```
+```bash
+./06-create_urls.py cs123/cs123-conts.txt
+#
+         file created: /usr/local/websockify/token/t123
+
+
+         file created: cs123/cs123-urls.txt
+
+
+         file created: /var/www/html/cs123-index.html
+
+VNC server started with vnc@cs123-newellz2.service
+VNC server started with vnc@cs123-sskidmore.service
+VNC server started with vnc@cs123-zestreito.service
+VNC server started with vnc@cs123-fgreen.service
+VNC server started with vnc@cs123-vle.service
+VNC server cheked for cs123-newellz2
+VNC server cheked for cs123-sskidmore
+VNC server cheked for cs123-zestreito
+VNC server cheked for cs123-fgreen
+VNC server cheked for cs123-vle
+```
+```bash
+cat cs123/cs123-urls.txt
+#
+cs123-newellz2:http://192.168.161.131/cs123-newellz2/vnc.html?path=cs123-newellz2/websockify?token=token12310
+cs123-sskidmore:http://192.168.161.131/cs123-sskidmore/vnc.html?path=cs123-sskidmore/websockify?token=token12311
+cs123-zestreito:http://192.168.161.131/cs123-zestreito/vnc.html?path=cs123-zestreito/websockify?token=token12312
+cs123-fgreen:http://192.168.161.131/cs123-fgreen/vnc.html?path=cs123-fgreen/websockify?token=token12313
+cs123-vle:http://192.168.161.131/cs123-vle/vnc.html?path=cs123-vle/websockify?token=token12314
+```
+```bash
+# launch websockify from server: 
+websockify -D --web /usr/share/novnc/ --token-plugin=TokenFile --token-source=/usr/local/websockify/token/t123 6080
+#
+WebSocket server settings:
+  - Listen on :6080
+  - Web server. Web root: /usr/share/novnc
+  - No SSL/TLS support (no cert file)
+  - Backgrounding (daemon)
+```
+```bash
+# in a browser: 
+http://192.168.161.131/cs123-index.html
+# click on cs123-newellz2
+# use Turbovnc server password, querty, can access vnc desktop! 
+# can also open directly with link: 
+http://192.168.161.131/cs123-newellz2/vnc.html?path=cs123-newellz2/websockify?token=token12310
+```
+---
 

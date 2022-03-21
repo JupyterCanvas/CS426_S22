@@ -48,11 +48,18 @@ logger.propagate = False
 
 def del_user(usernames):
     for u in usernames:
-        p = subprocess.run(["deluser", "--remove-home", u], stdout=PIPE)
+        p = subprocess.run(["deluser", u], stdout=PIPE)
         if p.returncode == 0:
             logger.info("Removed user: " + u)
         else: 
             logger.info("Error removing user: " + u)
+        # "--remove-home" flag isn't working with deluser, manally remove:
+        homedir = "/home/" + u 
+        p2 = subprocess.run(["rm", "-r", homedir], stdout=PIPE)
+        if p2.returncode == 0:
+            logger.info("Removed user homedir: " + homedir)
+        else: 
+            logger.info("Error removing user homedir: " + homedir)
 
 def main():
 

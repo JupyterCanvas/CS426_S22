@@ -60,6 +60,12 @@ def add_user(usernames):
             logger.info("Added user: " + u)
         else: 
             logger.info("Error adding user: " + u)
+        # add files to user home directories to test home bind in containers
+        p2 = subprocess.run(["./createfiles.sh", u], stdout=PIPE)
+        if p2.returncode == 0:
+            logger.info("Added test files for user: " + u)
+        else: 
+            logger.info("Error adding test files for user: " + u)
 
 # for development, need to update for production
 def set_temp_pass(usernames):

@@ -16,8 +16,10 @@ EnvironmentFile=/etc/systemd/system/containers/inst-%i.conf
 # can't set user with environment file, has to be with %i
 User=%i
 
+PIDFile=/home/%i/%i.pid
+
 # start singularity instance
-ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} /data/containers/debian.sif inst-%i
+ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} --env vncport=${VNCP} --pid-file /home/%i/%i.pid /data/containers/debian.sif inst-%i
 
 # stop singularity instance
 ExecStop=/usr/local/bin/singularity instance stop inst-%i

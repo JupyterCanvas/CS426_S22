@@ -316,4 +316,61 @@ Mar 19 14:35:50 jupytercanvas systemd[1]: Started Generate fakeroot container in
 - it also creates a cont#cs123-newellz.service instance
 - only call the sub unit service and its dependencies are generated automatically
 ---
+## systemd service template to set vncserver password and start vncserver
+can't set vncserver passwd in container def, set with service:
+
+```bash
+vim /etc/systemd/system/vnc@.service
+```
+```bash
+[Unit]
+Description=Set vncserver passwd and start vncserver
+
+[Service]
+# consider the unit to be active if the start action exited successfully
+RemainAfterExit=yes
+# VNCP=4
+EnvironmentFile=/etc/systemd/system/containers/inst-%i.conf
+# sets vncserver password and starts vncserver on user's port
+ExecStart=/etc/systemd/system/scripts/setvncpass.sh %i ${VNCP}
+```
+```bash
+systemctl start vnc@cs123-newellz2
+systemctl status vnc@cs123-newellz2
+```
+should have > 50 tasks: 
+```bash
+systemctl status vnc@cs123-newellz2 | grep Tasks: | awk '{print $2}'
+```
+if < 50 tasks, stop and start again: 
+```bash
+systemctl stop vnc@cs123-newellz2
+systemctl start vnc@cs123-newellz2
+```
+created script to check in ~/git/canvas/fixvnc.sh: 
+```bash
+#!/bin/bash
+
+# ./fixvnc.sh username
+
+TASKS=$(systemctl status vnc@${1}.service | grep Tasks: | awk '{print $2}')
+
+echo $TASKS
+
+if [ $TASKS -lt 50 ]
+then
+    systemctl stop vnc@${1}.service
+    systemctl start vnc@${1}.service
+fi
+
+sleep 1
+
+TASKS=$(systemctl status vnc@${1}.service | grep Tasks: | awk '{print $2}')
+
+echo $TASKS
+```
+I think there is a race condition when setting up the vncservers? But always works after stop/start if reported less than 50 tasks initially. fix script is called as part of create_urls.py after setup service is run initially. 
+
+--- 
+
 
