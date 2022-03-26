@@ -74,7 +74,7 @@ def main():
     
     usernames = []
     for netid in netids: 
-        username = course + "-" + netid
+        username = course + "-" + netid.split(':')[0]
         usernames.append(username)
 
     del_user(usernames)

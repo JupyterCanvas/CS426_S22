@@ -56,5 +56,6 @@ From: debian:bullseye
 %startscript
     # startscript echo is not output to terminal, but can capture to file:
     # echo "This is what happens when you start an instance of the container..." >> teststart.txt
+    
     # generate uniqe dbus id for container
     dbus-launch

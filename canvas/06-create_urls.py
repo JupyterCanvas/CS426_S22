@@ -70,12 +70,12 @@ def create_tokens(instances):
         # cs123-newellz2:token12310
         usertokenstr = user + ":" + token
         usertokens.append(usertokenstr)
-        
-    # ip = 10.0.123.10, subnet (3rd octet) = 123
-    subnet = instances[0].rsplit('.', 2)[1]
+
+    # inst = cs123-newellz2:10.0.123.10:5901
+    course = instances[0].split('-')[0]
 
     # create course token file
-    filename = "/usr/local/websockify/token/t" + subnet
+    filename = "/usr/local/websockify/token/" + course 
     
     with open(filename, 'w') as fout: 
         fout.write("\n".join(token for token in tokens))
@@ -135,27 +135,34 @@ def start_vnc(instances):
         instance = f"vnc@{user}.service"
         # reload in case unit changed
         subprocess.run(["systemctl", "daemon-reload"], stdout=PIPE)
+        subprocess.run(["sleep", "1"], stdout=PIPE)
+
         # stop instance in case already running 
         subprocess.run(["systemctl", "stop", instance], stdout=PIPE)
+        subprocess.run(["sleep", "3"], stdout=PIPE)
+        
         # start vncserver for instance
         p = subprocess.run(["systemctl", "start", instance], stdout=PIPE)
         if p.returncode == 0:
             logger.info("VNC server started with " + instance)
         else:
             logger.info("Error starting VNC server with " + instance)
-    
+   
+    # additions to sysctl.conf and 
+    # patch to TurboVNC vncserver executable fixed following issue: 
     # I think there is a race condition happening
     # 2-3 of the 5 vncserver services run less than 50 tasks
     # others run more than 70 tasks to fully setup vnc desktop
     # stopping and starting services with less than 50 tasks reported 
     # fixes the issue: 
-    for user in users: 
-        p = subprocess.run(["./fixvnc.sh", user], stdout=PIPE)
-        if p.returncode == 0:
-            logger.info("VNC server cheked for " + user)
-        else:
-            logger.info("Error checking VNC server for  " + user)
-        
+    #for user in users: 
+    #    p = subprocess.run(["./fixvnc.sh", user], stdout=PIPE)
+    #    if p.returncode == 0:
+    #        logger.info("VNC server checked for " + user + ":")
+    #        logger.info(p.stdout.decode('utf-8'))
+    #    else:
+    #        logger.info("Error checking VNC server for  " + user + ":")
+    #        logger.info(p.stdout.decode('utf-8'))
 
 
 def main():

@@ -1,0 +1,47 @@
+--- orgvnc/vncserver	2022-03-25 18:31:46.003168082 -0700
++++ vncpatch/vncserver	2022-03-25 18:46:37.312406222 -0700
+@@ -30,11 +30,17 @@
+ 
+ # First make sure we're operating in a sane environment.
+ 
+-$exedir = "";
+-$slashndx = rindex($0, "/");
+-if ($slashndx >= 0) {
+-  $exedir = substr($0, 0, $slashndx + 1);
+-}
++### BUG FIX: 
++###
++# hardcode execution directory, since we are executing a custom script in user's home dir
++$exedir = "/opt/TurboVNC/bin/";
++# and comment out: 
++#$slashndx = rindex($0, "/");
++#if ($slashndx >= 0) {
++#  $exedir = substr($0, 0, $slashndx + 1);
++#}
++###
++### END BUG FIX. 
+ 
+ # The script looks for the Java classes in $exedir/../java first, then if
+ # it can't find them there, it looks in the directory specified by
+@@ -503,13 +509,19 @@
+ }
+ 
+ # Find display number.
+-
+ if ((@ARGV > 0) && ($ARGV[0] =~ /^:(\d+)$/)) {
+   $displayNumber = $1;
+   shift(@ARGV);
+   unless (&CheckDisplayNumber($displayNumber)) {
+-    die "A VNC server is already running as :$displayNumber\n";
++
++### BUG FIX:
++###
++  # bug found in this section, per Zach N. commenting out next line to patch:
++  #die "A VNC server is already running as :$displayNumber\n";
+   }
++###
++### END BUG FIX. 
++
+ } elsif ((@ARGV > 0) && ($ARGV[0] !~ /^-/) && ($ARGV[0] !~ /^\+/)) {
+   &Usage();
+ } else {

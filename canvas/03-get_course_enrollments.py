@@ -134,14 +134,16 @@ def main():
     students = []
     for e in enrollments:
         netid = e["user"]["login_id"]
+        sis_user_id = e["user"]["sis_user_id"]
+        id_string = netid + ":" + str(sis_user_id)
         if e["role"] == "TeacherEnrollment":
-            instructors.append(netid)
+            instructors.append(id_string)
         if e["role"] == "TaEnrollment":
-            tas.append(netid)
+            tas.append(id_string)
         # ObserverEnrollment ?
         # exclude test student, netid = 33477b74eb96b827caa768bd731b784645a5c87a
         if e["role"] == "StudentEnrollment" and len(netid) < 35:
-            students.append(netid)
+            students.append(id_string)
     
     instructors.sort()
     tas.sort()

@@ -1,9 +1,9 @@
-cs123:44240000000083090:22-03-13 08:10 PM
+cs123:44240000000083090:22-03-23 09:44 AM
 # instructors:
-newellz2
-sskidmore
-zestreito
+newellz2:1000061685
+sskidmore:5004416087
+zestreito:8001283114
 # tas:
-fgreen
+fgreen:8001110071
 # students:
-vle
+vle:1005355129
