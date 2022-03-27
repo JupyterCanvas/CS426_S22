@@ -9,3 +9,4 @@ After=cont@%i.service
 # pings google.com from inside container to test network config
 ExecStart=/etc/systemd/system/scripts/pingcow.sh %i
 
+

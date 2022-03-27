@@ -144,8 +144,10 @@ def create_instances(usernames):
         subprocess.run(["systemctl", "stop", depinst], stdout=PIPE)
         # only need to stop services and super units that remain after exit
         # testcont stops after initial run, any start command will completely restart
-        # start testcont for instance (starts cont for instance)
+        
         instance = f"testcont@{user}.service"
+        
+        # start testcont for instance (starts cont for instance)
         p = subprocess.run(["systemctl", "start", instance], stdout=PIPE)
         if p.returncode == 0:
             logger.info("Container " + depinst + " created for " + user)

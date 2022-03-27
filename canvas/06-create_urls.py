@@ -149,20 +149,21 @@ def start_vnc(instances):
             logger.info("Error starting VNC server with " + instance)
    
     # additions to sysctl.conf and 
-    # patch to TurboVNC vncserver executable fixed following issue: 
+    # patch to TurboVNC vncserver executable fixed following issue 
+    # - no it didn't, putting check back in
     # I think there is a race condition happening
     # 2-3 of the 5 vncserver services run less than 50 tasks
     # others run more than 70 tasks to fully setup vnc desktop
     # stopping and starting services with less than 50 tasks reported 
-    # fixes the issue: 
-    #for user in users: 
-    #    p = subprocess.run(["./fixvnc.sh", user], stdout=PIPE)
-    #    if p.returncode == 0:
-    #        logger.info("VNC server checked for " + user + ":")
-    #        logger.info(p.stdout.decode('utf-8'))
-    #    else:
-    #        logger.info("Error checking VNC server for  " + user + ":")
-    #        logger.info(p.stdout.decode('utf-8'))
+    # fixes the issue:
+    for user in users: 
+        p = subprocess.run(["./fixvnc.sh", user], stdout=PIPE)
+        if p.returncode == 0:
+            logger.info("VNC server checked for " + user + ":")
+            logger.info(p.stdout.decode('utf-8'))
+        else:
+            logger.info("Error checking VNC server for  " + user + ":")
+            logger.info(p.stdout.decode('utf-8'))
 
 
 def main():

@@ -6,7 +6,9 @@ Description=Set vncserver passwd and start vncserver on user's port
 RemainAfterExit=yes
 # VNCP=4
 EnvironmentFile=/etc/systemd/system/containers/inst-%i.conf
+
 # sets vncserver password and starts vncserver on user's port
 ExecStart=/etc/systemd/system/scripts/setvncpass.sh %i ${VNCP}
 
+ExecStop=/etc/systemd/system/scripts/killvnc.sh %i
 

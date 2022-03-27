@@ -110,7 +110,9 @@ def start_ws(wsports):
     for w in wsports: 
         user = w.split(':')[0]
         wsport = w.split(':')[1]
+
         instance = f"ws@{user}.service"
+        
         p = subprocess.run(["systemctl", "start", instance], stdout=PIPE)
         if p.returncode == 0: 
             logger.info("Websockify started for " + user + " on server, port: " + wsport)
