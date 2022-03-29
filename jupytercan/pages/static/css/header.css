@@ -1,5 +1,5 @@
 .header {
-  text-align: center;
+  text-align: left;
   background: #badff5;
   color: white;
   font-size: 30px;
@@ -11,7 +11,15 @@
 .hello{
 	font-size: 18px;
 	color: #fff;
-	margin-right: 20px;
+	float: right;
+	padding: 10px;
+	
 	
 }
-
+img.avatar {
+  
+  border-radius: 50%;
+  max-width: 8%;
+  max-height: 8%;
+  float: left;
+}

@@ -7,9 +7,11 @@
 
 
 {% block content %}
-<div class="header text-center">
+
+<div class="header">
+<img class="avatar" src="{% static 'pages/jupiter.png' %}">
   <h1>Dashboard</h1>
-  <span class="hello">Hello, {{request.user}}</span>
+  <span class="hello" style="text-align: right">Hello, {{request.user}}</span>
 </div>
 
 {% endblock content %} 

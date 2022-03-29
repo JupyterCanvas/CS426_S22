@@ -15,6 +15,8 @@ from .models import Upload
 
 from django.contrib.auth import authenticate, login, logout
 
+from .decorators import unauthenticated_user, allowed_users, admin_only
+
 from django.contrib import messages
 
 from django.contrib.auth.decorators import login_required
@@ -25,15 +27,15 @@ from django.contrib.auth.decorators import login_required
 #class AboutPageView(TemplateView):
 #    template_name = 'about.html'
 
+@unauthenticated_user
 def loginPage(request):
-	if request.user.is_authenticated:
-		return redirect('home')
-	else:
+	
 		if request.method == 'POST':
 			username = request.POST.get('username')
 			password = request.POST.get('password')
 			
 			user = authenticate(request, username=username, password=password)
+			
 			if user is not None:
 				login(request, user)
 				return redirect('home')
@@ -49,16 +51,28 @@ class RegisterView(CreateView):
     template_name = 'registration/register.html'
 
 @login_required(login_url='login')
+@admin_only
 def home(request):
 	return render(request, 'dashboard.html')
 
 def logoutUser(request):
 	logout(request)
 	return redirect('login')
+
 	
 class DashboardView(TemplateView):
     template_name = 'dashboard.html'
     
+@login_required(login_url='login')    
+def student(request):
+	context = {}
+	return render(request, 'student.html', context)  
+	
+@login_required(login_url='login')    
+def instructor(request):
+	context = {}
+	return render(request, 'instructor.html', context)  
+
 class ProjectsPageView(TemplateView):
     template_name = 'projects.html'
     
