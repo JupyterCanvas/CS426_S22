@@ -239,6 +239,15 @@ span.psw {
   to {transform: scale(1)}
 }
 
+@keyframes slideLeft{
+	0%{
+	transform: translateX(-100%);
+	}
+	100%{
+	transform: translateX(0);
+	}
+}
+
 /* Change styles for span and cancel button on extra small screens */
 @media screen and (max-width: 300px) {
   span.psw {
@@ -249,6 +258,10 @@ span.psw {
      width: 100%;
   }
 }
+
+body {
+	animation: 1s ease-out 0s 1 slideLeft;
+}	
 
 .bsize{
 height: 50px;

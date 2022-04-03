@@ -23,3 +23,15 @@ img.avatar {
   max-height: 8%;
   float: left;
 }
+
+footer {
+	text-align: center;
+	padding: 30px;
+	background: #badff5;
+	color: black;
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	height: 40px;
+	width: 100%;
+}
