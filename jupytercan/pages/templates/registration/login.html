@@ -24,10 +24,20 @@ demo code easily</br> and for students to get immediate feedback </br>on the cod
 </div>
 <div id="id01" class="modal">
   
+  
   <form class="modal-content animate" action="" method="post">
     <div class="imgcontainer">
       <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
       <img class="avatar" src="{% static 'pages/jupiter.png' %}">
+      
+      {% for message in messages %}
+  <div class="alert alert-success" style="background-color: red;">
+  	<a class="close" href="#" data-dismiss="alert">x</a>
+  	{{ message }}
+  	
+  </div>
+  {% endfor %}
+  
     </div>
 	{% csrf_token %}
     <div class="container">
