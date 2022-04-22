@@ -1,5 +1,0 @@
-cs123-newellz2:http://192.168.161.131/cs123-newellz2/vnc.html?path=cs123-newellz2/websockify?token=token12310
-cs123-sskidmore:http://192.168.161.131/cs123-sskidmore/vnc.html?path=cs123-sskidmore/websockify?token=token12311
-cs123-zestreito:http://192.168.161.131/cs123-zestreito/vnc.html?path=cs123-zestreito/websockify?token=token12312
-cs123-fgreen:http://192.168.161.131/cs123-fgreen/vnc.html?path=cs123-fgreen/websockify?token=token12313
-cs123-vle:http://192.168.161.131/cs123-vle/vnc.html?path=cs123-vle/websockify?token=token12314
