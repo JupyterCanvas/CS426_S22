@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Homepage</h1>
+{% if user.is_authenticated %}
+    Hi {{ user.username }}!
+    
+    {% if user.id <= 2 %}
+    	Your user id is {{ user.id }} which is less than or equal to 2!
+    {% else %}
+    	Your user id is {{ user.id }} which is greater than 2!
+    {% endif %}
+    
+    {% if user.username == "Student" %}
+        You are a student!
+    {% endif %}
+    
+    {% if user.username == "Teacher" %}
+        You are an instructor!
+    {% endif %}
+    
+    <p><a href="{% url 'logout' %}">Log Out</a></p>
+{% else %}
+    <p>You are not logged in</p>
+    <p><a href="{% url 'login' %}">Log In</a></p>
+{% endif %}
+{% endblock content %}
