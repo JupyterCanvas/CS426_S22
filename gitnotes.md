@@ -158,4 +158,18 @@ git checkout -b archive archive/main-S
 git merge archive/container
 git merge archive/test-git
 ```
+---
 
+## errors pushing branch? 
+```bash
+# issues with branch - not sure how but had http instead of ssh url 
+# couldn't fetch other branches or link new local with remote 
+# (managed to create remote from local, but couldn't track with local) 
+# b/c the fetch ref was for main-F not origin
+url = https://github.com/JupyterCanvas/CS426_S22.git
+# change to:
+url = git@github.com:JupyterCanvas/CS426_S22.git
+fetch = +refs/heads/main-F:refs/remotes/origin/main-F
+# change to:
+fetch = +refs/heads/*:refs/remotes/origin/*
+```
