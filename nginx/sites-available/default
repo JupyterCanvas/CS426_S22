@@ -17,7 +17,7 @@ upstream django_hosts {
 server {
 	listen 8000 default_server;
 
-	server_name _;
+	server_name jupyter-canvas.cse.unr.edu;
 
 	location / {
 		# uwsgi/django config
