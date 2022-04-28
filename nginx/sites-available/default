@@ -1,6 +1,52 @@
+# This is the main web server configuration file
+
+# docs: 
+# https://nginx.org/en/docs/
+# https://docs.nginx.com/nginx/admin-guide/
+
+# https://docs.nginx.com/nginx/admin-guide/web-server/app-gateway-uwsgi-django/
+# https://django-best-practices.readthedocs.io/en/latest/deployment/servers.html#nginx
+# uWSGI application server
+upstream django_hosts { 
+   server 127.0.0.1:8001; 
+#   server unix:///srv/apps/jupytercan/jupytercan.sock; 
+} 
+
+# Default server configuration
+
 server {
-	listen 80 default_server;
-	listen [::]:80 default_server;
+	listen 8000 default_server;
+
+	server_name _;
+
+	location / {
+		# uwsgi/django config
+           	uwsgi_pass         django_hosts; 
+            	include            /etc/nginx/uwsgi_params; 
+		
+		# https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/ 
+            	# create reverse proxy
+		proxy_redirect     off; 
+            	proxy_set_header   Host $host; 
+            	proxy_set_header   X-Real-IP $remote_addr; 
+            	proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for; 
+            	proxy_set_header   X-Forwarded-Host $server_name; 
+
+		# First attempt to serve request as file, then
+		# as directory, then fall back to displaying a 404.
+		#try_files $uri $uri/ =404;
+	}
+
+	# static and media files served directly by nginx
+	location /static/ { 
+            alias /srv/apps/jupytercan/static/; 
+        }
+
+}
+
+
+server {
+	listen 80;
 
 	root /var/www/html;
 
@@ -21,5 +67,3 @@ server {
 	# Reverse proxy NoVNC+websockify:
 	include /etc/nginx/sites-available/containers/*.conf;
 }
-
-

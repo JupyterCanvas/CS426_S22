@@ -20,7 +20,7 @@ User=%i
 
 # start singularity instance
 #ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} --pid-file /home/%i/%i.pid /data/containers/debian.sif inst-%i
-ExecStart=/usr/local/bin/singularity instance start --bind /srv/nbgrader/exchange:/srv/nbgrader/exchange --fakeroot --net --network-args ${IP} --pid-file /home/%i/%i.pid /data/containers/debian.sif inst-%i
+ExecStart=/usr/local/bin/singularity instance start --bind /srv/nbgrader/exchange:/srv/nbgrader/exchange --fakeroot --writable --net --network-args ${IP} --pid-file /home/%i/%i.pid /data/containers/debian.sif inst-%i
 
 # stop singularity instance
 ExecStop=/usr/local/bin/singularity instance stop inst-%i

@@ -4,13 +4,9 @@ From: debian:bullseye
 
 %files
     files/sources.list /etc/apt
-    files/post.bash /opt/post.bash
-    files/config.ini /opt/config.ini
 
 %environment
     export PATH=/opt/TurboVNC/bin:$PATH
-    # Extremely lazy sourcing of the Conda activation script
-    export PROMPT_COMMAND='source /opt/micromamba/init.bash; unset PROMPT_COMMAND'
 
 %post
     echo "Hello from inside the container"
@@ -54,41 +50,6 @@ From: debian:bullseye
     # create exchange dir mount point
     mkdir -p /srv/nbgrader/exchange
     
-    # Install micromamba
-    cd /opt
-    wget -qO- "https://micromamba.snakepit.net/api/micromamba/linux-64/latest" | tar -xvj bin/micromamba
-    ./bin/micromamba shell init -s bash -p /opt/micromamba
-
-    # containerized micromamba installation modified from:
-    # https://github.com/ds4dm/singularity-conda/blob/main/conda.def
-    # Put the Conda initialization script in a file for lazy loading
-    # Singularity does all the environment sourcing as shell (only latter calls bash),
-    # which conda does not support.
-    # We put the content in a file, manually call bash, and source it.
-    {
-	echo 'eval "$('/opt/bin/micromamba' shell hook --shell bash --prefix '/opt/micromamba' 2> /dev/null)"'
-	echo 'if [ $? -eq 0 ]; then'
-	echo '  eval "$__mamba_setup"'
-	echo 'else'
-	echo '  if [ -f "/opt/micromamba/etc/profile.d/micromamba.sh" ]; then'
-	echo '    . "/opt/micromamba/etc/profile.d/micromamba.sh"'
-	echo '  else'
-	echo '    export  PATH="/opt/micromamba/bin:$PATH"'  # extra space after export prevents interference from conda init
-	echo '  fi'
-	echo 'fi'
-	echo 'unset __mamba_setup'
-    } >> /opt/micromamba/init.bash
-    # Execute the post.bash script.
-    # Use bash to properly activate the environment and install packages.
-    # the environment is activated and performs installs in the post.bash script
-    echo 'source /opt/micromamba/init.bash' | cat - /opt/post.bash | bash  
-
-    # pull the nb_canvas repo and install
-    cd /opt && pwd
-    git clone https://github.com/zachestreito/nb_canvas
-    cd nb_canvas
-    git update-index --assume-unchanged config.ini
-    cp /opt/config.ini /opt/nb_canvas/
 
 # contents of the %runscript section written to a file within container that is
 # executed when the container image is run (via the singularity run command or
