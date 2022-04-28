@@ -27,7 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '172.20.195.248']
+ALLOWED_HOSTS = ['localhost', '172.20.195.248', 'jupyter-canvas.cse.unr.edu']
 
 
 # Application definition
