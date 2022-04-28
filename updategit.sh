@@ -5,3 +5,4 @@
 /etc/nginx/updategit.sh
 /var/www/html/updategit.sh
 /etc/systemd/system/updategit.sh
+/etc/uwsgi/updategit.sh
