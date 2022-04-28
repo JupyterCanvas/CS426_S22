@@ -1,0 +1,37 @@
+.header {
+  text-align: left;
+  background: #badff5;
+  color: white;
+  font-size: 30px;
+  width: 100%;
+  top: 0;
+  left: 0;
+  position: fixed;
+}
+.hello{
+	font-size: 18px;
+	color: #fff;
+	float: right;
+	padding: 10px;
+	
+	
+}
+img.avatar {
+  
+  border-radius: 50%;
+  max-width: 8%;
+  max-height: 8%;
+  float: left;
+}
+
+footer {
+	text-align: center;
+	padding: 30px;
+	background: #badff5;
+	color: black;
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	height: 40px;
+	width: 100%;
+}

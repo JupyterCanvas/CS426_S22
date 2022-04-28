@@ -13,6 +13,7 @@
 
 .login #header h1 {
     font-size: 18px;
+    margin: 0;
 }
 
 .login #header h1 a {
@@ -43,7 +44,11 @@
     line-height: 2em;
 }
 
-
+.login .form-row #id_username, .login .form-row #id_password {
+    padding: 8px;
+    width: 100%;
+    box-sizing: border-box;
+}
 
 .login .submit-row {
     padding: 1em 0 0 0;
