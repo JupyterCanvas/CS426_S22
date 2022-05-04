@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-# Start websockify instances for users on server
-# ./start_websockify.py CS123/CS123-urls.txt
-# (run create_urls.py to generate url list file)
-
 import sys # for sys.exit, sys.argv
 import logging 
 import argparse # for adding CLI tags/help
@@ -16,6 +12,7 @@ import re # for regular expression matching
 parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description=textwrap.dedent('''\
+                Initializes nbcanvas library inside user containers. 
         '''),
         epilog='\
         ')

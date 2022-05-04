@@ -52,7 +52,7 @@ server {
 
 	index index.html index.htm index.nginx-debian.html;
 
-	server_name _;
+	server_name jupyter-canvas.cse.unr.edu;
 
 	location / {
 		# First attempt to serve request as file, then
