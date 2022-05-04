@@ -1,0 +1,16 @@
+[Unit]
+Description=Start websockify on user's port 
+# Ensure container vncserver is configured
+BindsTo=vnc@%i.service
+After=vnc@%i.service
+
+[Service]
+# consider the unit to be active if the start action exited successfully
+RemainAfterExit=yes
+EnvironmentFile=/etc/systemd/system/containers/ws-%i.conf
+# sets vncserver password and starts vncserver on user's port
+ExecStart=websockify -D --web /usr/share/novnc/ --token-plugin=TokenFile --token-source=/usr/local/websockify/token/${COURSE} ${WSPORT}
+
+ExecStop=/etc/systemd/system/scripts/killws.sh ${WSPORT}
+
+

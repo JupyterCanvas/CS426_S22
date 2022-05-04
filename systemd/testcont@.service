@@ -1,0 +1,12 @@
+[Unit]
+Description=Test container networking 
+# Ensure container is configured
+# Generates container if it does not exist
+BindsTo=cont@%i.service
+After=cont@%i.service
+
+[Service]
+# pings google.com from inside container to test network config
+ExecStart=/etc/systemd/system/scripts/pingcow.sh %i
+
+

@@ -1,0 +1,112 @@
+
+Bootstrap: library
+From: debian:bullseye
+
+%files
+    files/sources.list /etc/apt
+    files/post.bash /opt/post.bash
+    files/config.ini /opt/config.ini
+
+%environment
+    export PATH=/opt/TurboVNC/bin:$PATH
+    # Extremely lazy sourcing of the Conda activation script
+    export PROMPT_COMMAND='source /opt/micromamba/init.bash; unset PROMPT_COMMAND'
+
+%post
+    echo "Hello from inside the container"
+
+    # set apt to noninteractive install
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt update && apt upgrade -y
+    apt install -y vim \
+        locales \
+        firefox-esr pciutils libegl-dev \
+        xfce4 xfce4-terminal mousepad dbus-x11 \
+        wget libegl1-mesa \
+        novnc \
+        iproute2 iputils-ping \
+	git python3-pip 
+
+    # set default locale
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen en_US.utf8
+    update-locale LANG=en_US.UTF-8
+
+    # set timezone
+    ln -snf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+    echo America/Los_Angeles > /etc/timezone
+    dpkg-reconfigure --frontend noninteractive tzdata
+
+    # install VirtualGL for xfce
+    wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb
+    dpkg -i virtualgl_3.0_amd64.deb
+    rm virtualgl_3.0_amd64.deb
+
+    # install TurboVNC VNC server
+    wget https://sourceforge.net/projects/turbovnc/files/2.2.7/turbovnc_2.2.7_amd64.deb
+    dpkg -i turbovnc_2.2.7_amd64.deb
+    rm turbovnc_2.2.7_amd64.deb
+
+    # install Jupyterlab
+    pip install jupyterlab
+
+    # create exchange dir mount point
+    mkdir -p /srv/nbgrader/exchange
+    
+    # Install micromamba
+    cd /opt
+    wget -qO- "https://micromamba.snakepit.net/api/micromamba/linux-64/latest" | tar -xvj bin/micromamba
+    ./bin/micromamba shell init -s bash -p /opt/micromamba
+
+    # containerized micromamba installation modified from:
+    # https://github.com/ds4dm/singularity-conda/blob/main/conda.def
+    # Put the Conda initialization script in a file for lazy loading
+    # Singularity does all the environment sourcing as shell (only latter calls bash),
+    # which conda does not support.
+    # We put the content in a file, manually call bash, and source it.
+    {
+	echo 'eval "$('/opt/bin/micromamba' shell hook --shell bash --prefix '/opt/micromamba' 2> /dev/null)"'
+	echo 'if [ $? -eq 0 ]; then'
+	echo '  eval "$__mamba_setup"'
+	echo 'else'
+	echo '  if [ -f "/opt/micromamba/etc/profile.d/micromamba.sh" ]; then'
+	echo '    . "/opt/micromamba/etc/profile.d/micromamba.sh"'
+	echo '  else'
+	echo '    export  PATH="/opt/micromamba/bin:$PATH"'  # extra space after export prevents interference from conda init
+	echo '  fi'
+	echo 'fi'
+	echo 'unset __mamba_setup'
+    } >> /opt/micromamba/init.bash
+    # Execute the post.bash script.
+    # Use bash to properly activate the environment and install packages.
+    # the environment is activated and performs installs in the post.bash script
+    echo 'source /opt/micromamba/init.bash' | cat - /opt/post.bash | bash  
+
+    # pull the nb_canvas repo and install
+    cd /opt && pwd
+    git clone https://github.com/zachestreito/nb_canvas
+    cd nb_canvas
+    git update-index --assume-unchanged config.ini
+    cp /opt/config.ini /opt/nb_canvas/
+
+    
+    # pull the moss repo and install
+    cd /opt && pwd
+    git clone https://github.com/zachestreito/nb_moss
+
+# contents of the %runscript section written to a file within container that is
+# executed when the container image is run (via the singularity run command or
+# by executing the container directly as a command).
+%runscript
+    echo "This is what happens when you run the container..."
+
+# Similar to the %runscript section, contents of %startscript section written to
+# a file within container at build time.
+# File is executed when instance start command is issued.
+%startscript
+    # startscript echo is not output to terminal, but can capture to file:
+    # echo "This is what happens when you start an instance of the container..." >> teststart.txt
+    
+    # generate uniqe dbus id for container
+    dbus-launch

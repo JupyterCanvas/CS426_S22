@@ -1,0 +1,9 @@
+[Unit]
+Description=Run nbcanvas init script to create course directory and nbgrader config 
+
+[Service]
+# consider the unit to be active if the start action exited successfully
+RemainAfterExit=yes
+
+ExecStart=/etc/systemd/system/scripts/init_nbcanvas.sh %i
+

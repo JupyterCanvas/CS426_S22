@@ -1,0 +1,68 @@
+
+Bootstrap: library
+From: debian:bullseye
+
+%files
+    files/sources.list /etc/apt
+
+%environment
+    export PATH=/opt/TurboVNC/bin:$PATH
+
+%post
+    echo "Hello from inside the container"
+
+    # set apt to noninteractive install
+    export DEBIAN_FRONTEND=noninteractive
+
+    apt update && apt upgrade -y
+    apt install -y vim \
+        locales \
+        firefox-esr pciutils libegl-dev \
+        xfce4 xfce4-terminal mousepad dbus-x11 \
+        wget libegl1-mesa \
+        novnc \
+        iproute2 iputils-ping \
+	git
+
+    # set default locale
+    echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+    locale-gen en_US.utf8
+    update-locale LANG=en_US.UTF-8
+
+    # set timezone
+    ln -snf /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+    echo America/Los_Angeles > /etc/timezone
+    dpkg-reconfigure --frontend noninteractive tzdata
+
+    # install VirtualGL for xfce
+    wget https://sourceforge.net/projects/virtualgl/files/3.0/virtualgl_3.0_amd64.deb
+    dpkg -i virtualgl_3.0_amd64.deb
+    rm virtualgl_3.0_amd64.deb
+
+    # install TurboVNC VNC server
+    wget https://sourceforge.net/projects/turbovnc/files/2.2.7/turbovnc_2.2.7_amd64.deb
+    dpkg -i turbovnc_2.2.7_amd64.deb
+    rm turbovnc_2.2.7_amd64.deb
+
+    # install Jupyterlab
+    #pip install jupyterlab
+
+    # create exchange dir mount point
+    mkdir -p /srv/nbgrader/exchange
+    
+
+# contents of the %runscript section written to a file within container that is
+# executed when the container image is run (via the singularity run command or
+# by executing the container directly as a command).
+%runscript
+    echo "This is what happens when you run the container..."
+
+# Similar to the %runscript section, contents of %startscript section written to
+# a file within container at build time.
+# File is executed when instance start command is issued.
+%startscript
+    # startscript echo is not output to terminal, but can capture to file:
+    # echo "This is what happens when you start an instance of the container..." >> teststart.txt
+    
+    # generate uniqe dbus id for container
+    dbus-launch

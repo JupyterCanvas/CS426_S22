@@ -1,0 +1,16 @@
+# This is a service to start the uwsgi web server gateway interface automatically at boot
+
+[Unit] 
+Description=uwsgi applicaiton 
+After=network.target 
+ 
+[Service] 
+EnvironmentFile=-/etc/default/jupytercan
+Type=simple
+ExecStart=/usr/bin/uwsgi --ini /etc/uwsgi/apps-available/jupytercan.ini 
+Restart=always 
+KillSignal=SIGQUIT 
+StandardError=syslog 
+ 
+[Install] 
+WantedBy=multi-user.target

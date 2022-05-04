@@ -1,0 +1,6 @@
+# ignore development sandbox
+debian/
+# ignore image
+debian.sif
+# ignore config.ini (api key)
+files/config.ini

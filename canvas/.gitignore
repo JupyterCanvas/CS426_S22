@@ -1,0 +1,4 @@
+# ignore Canvas auth
+local_settings.py
+# cache
+__pycache__/

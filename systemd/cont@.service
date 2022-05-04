@@ -1,0 +1,28 @@
+[Unit]
+Description=Generate fakeroot container instance with IP in own network namespace
+
+[Service]
+# forking because 'instance start' starts an instance and exits
+Type=forking
+# pid file for forking type
+PIDFile=/home/%i/%i.pid
+# consider the unit to be active if the start action exited successfully
+RemainAfterExit=yes
+
+# containers/inst-username.conf stores ip:
+# IP="IP=10.0.123.10"
+EnvironmentFile=/etc/systemd/system/containers/inst-%i.conf
+
+# run as user
+#User=cs123-newellz2
+# can't set user with environment file, has to be with %i
+User=%i
+
+# start singularity instance
+#ExecStart=/usr/local/bin/singularity instance start --fakeroot --net --network-args ${IP} --pid-file /home/%i/%i.pid /data/containers/debian.sif inst-%i
+ExecStart=/usr/local/bin/singularity instance start --bind /srv/nbgrader/exchange:/srv/nbgrader/exchange --fakeroot --writable --net --network-args ${IP} --pid-file /home/%i/%i.pid /data/containers/debian.sif inst-%i
+
+# stop singularity instance
+ExecStop=/usr/local/bin/singularity instance stop inst-%i
+
+
